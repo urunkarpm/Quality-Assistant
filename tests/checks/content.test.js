@@ -10,6 +10,9 @@ beforeAll(async () => {
   server  = http.createServer((req, res) => {
     if      (req.url === '/ok')     { res.writeHead(200); res.end('ok'); }
     else if (req.url === '/broken') { res.writeHead(404); res.end(); }
+    else if (req.url === '/r1') { res.writeHead(302, { Location: '/r2' }); res.end(); }
+    else if (req.url === '/r2') { res.writeHead(302, { Location: '/r3' }); res.end(); }
+    else if (req.url === '/r3') { res.writeHead(302, { Location: '/ok' }); res.end(); }
     else { res.writeHead(200, { 'Content-Type': 'text/html' }); res.end('<html><body></body></html>'); }
   });
   await new Promise(r => server.listen(0, r));
@@ -52,6 +55,14 @@ describe('content check', () => {
     const issues = await check(page, {}, 'http://localhost/');
     await page.close();
     expect(issues).toHaveLength(0);
+  });
+
+  test('flags redirect chain > 2 hops as minor', async () => {
+    const page = await browser.newPage();
+    await page.setContent(`<html><body><a href="http://localhost:${port}/r1">Redirect</a></body></html>`);
+    const issues = await check(page, {}, `http://localhost:${port}/`);
+    await page.close();
+    expect(issues.find(i => i.title === 'Excessive redirect chain')).toMatchObject({ sev: 'minor', type: 'Content' });
   });
 
   test('all issues have type Content', async () => {

@@ -11,26 +11,44 @@ async function check(page, _responseHeaders, pageUrl = '') {
   const checked = new Set();
 
   async function headCheck(url) {
-    if (!url || checked.has(url)) return null;
+    if (!url || checked.has(url)) return { status: null, hops: 0 };
     checked.add(url);
-    if (/^(mailto:|tel:|javascript:)/i.test(url)) return null;
+    if (/^(mailto:|tel:|javascript:)/i.test(url)) return { status: null, hops: 0 };
+    let current = url;
+    let hops = 0;
     try {
-      const res = await fetch(url, { method: 'HEAD', redirect: 'follow', signal: AbortSignal.timeout(8000) });
-      return res.status;
-    } catch { return null; }
+      while (hops <= 10) {
+        const res = await fetch(current, { method: 'HEAD', redirect: 'manual', signal: AbortSignal.timeout(8000) });
+        if (res.status >= 300 && res.status < 400) {
+          const loc = res.headers.get('location');
+          if (!loc) break;
+          current = new URL(loc, current).href;
+          hops++;
+        } else {
+          return { status: res.status, hops };
+        }
+      }
+      return { status: null, hops };
+    } catch { return { status: null, hops: 0 }; }
   }
 
   for (const link of links) {
-    const status = await headCheck(link.href);
+    const { status, hops } = await headCheck(link.href);
     if (status !== null && status >= 400) {
       issues.push({ sev: 'major', type: 'Content', title: 'Broken link', selector: `a[href="${link.href}"]`, page: path, wcag: null, desc: `Link "${link.text || link.href}" returns HTTP ${status}.` });
+    }
+    if (hops > 2) {
+      issues.push({ sev: 'minor', type: 'Content', title: 'Excessive redirect chain', selector: `a[href="${link.href}"]`, page: path, wcag: null, desc: `Link "${link.text || link.href}" requires ${hops} redirects (max 2).` });
     }
   }
 
   for (const img of images) {
-    const status = await headCheck(img.src);
+    const { status, hops } = await headCheck(img.src);
     if (status !== null && status >= 400) {
       issues.push({ sev: 'major', type: 'Content', title: 'Broken image', selector: `img[src="${img.src}"]`, page: path, wcag: null, desc: `Image at "${img.src}" returns HTTP ${status}.` });
+    }
+    if (hops > 2) {
+      issues.push({ sev: 'minor', type: 'Content', title: 'Excessive redirect chain', selector: `img[src="${img.src}"]`, page: path, wcag: null, desc: `Image at "${img.src}" requires ${hops} redirects (max 2).` });
     }
   }
 
