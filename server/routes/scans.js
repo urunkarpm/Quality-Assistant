@@ -3,6 +3,8 @@ const router = require('express').Router();
 const { createScan, getScan, getScans, updateScan, createIssue } = require('../db');
 const { runScan, computeScore } = require('../scanner/runner');
 
+let scanRunning = false;
+
 router.get('/', (_req, res) => res.json(getScans()));
 
 router.get('/:id', (req, res) => {
@@ -15,9 +17,12 @@ router.post('/', (req, res) => {
   const { url, pageLimit } = req.body;
   if (!url) return res.status(400).json({ error: 'url is required' });
   try { new URL(url); } catch { return res.status(400).json({ error: 'url is not a valid URL' }); }
-  if (!pageLimit || !Number.isInteger(pageLimit) || pageLimit < 1) {
+  if (!pageLimit || !Number.isInteger(pageLimit) || pageLimit < 1 || pageLimit > 50) {
     return res.status(400).json({ error: 'pageLimit must be a positive integer' });
   }
+
+  if (scanRunning) return res.status(409).json({ error: 'A scan is already in progress. Please wait for it to complete.' });
+  scanRunning = true;
 
   const scanId = createScan(url, pageLimit);
 
@@ -27,7 +32,8 @@ router.post('/', (req, res) => {
     })
     .catch(err => {
       updateScan(scanId, { status: 'failed', error: err.message, finished_at: Math.floor(Date.now() / 1000) });
-    });
+    })
+    .finally(() => { scanRunning = false; });
 
   res.status(202).json({ scanId });
 });

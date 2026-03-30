@@ -23,14 +23,21 @@ async function runScan(url, pageLimit, onIssue) {
     const pages = await crawl(browser, url, pageLimit);
 
     for (const { url: pageUrl, page, responseHeaders } of pages) {
-      for (const fn of [adaCheck, visualCheck, contentCheck, seoCheck, securityCheck, perfCheck]) {
-        const found = await fn(page, responseHeaders, pageUrl);
-        for (const issue of found) {
-          allIssues.push(issue);
-          if (onIssue) onIssue(issue);
+      try {
+        for (const fn of [adaCheck, visualCheck, contentCheck, seoCheck, securityCheck, perfCheck]) {
+          try {
+            const found = await fn(page, responseHeaders, pageUrl);
+            for (const issue of found) {
+              allIssues.push(issue);
+              if (onIssue) onIssue(issue);
+            }
+          } catch (err) {
+            console.warn(`[runner] ${fn.name} failed on ${pageUrl}: ${err.message}`);
+          }
         }
+      } finally {
+        await page.close();
       }
-      await page.close();
     }
 
     return { issues: allIssues, pagesScanned: pages.length };
