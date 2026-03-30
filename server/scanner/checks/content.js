@@ -8,9 +8,10 @@ async function check(page, _responseHeaders, pageUrl = '') {
     images: Array.from(document.querySelectorAll('img[src]')).map(i => ({ src: i.src })),
   }));
 
-  const checked = new Set();
+  const checkedLinks = new Set();
+  const checkedImages = new Set();
 
-  async function headCheck(url) {
+  async function headCheck(url, checked) {
     if (!url || checked.has(url)) return { status: null, hops: 0 };
     checked.add(url);
     if (/^(mailto:|tel:|javascript:)/i.test(url)) return { status: null, hops: 0 };
@@ -33,7 +34,7 @@ async function check(page, _responseHeaders, pageUrl = '') {
   }
 
   for (const link of links) {
-    const { status, hops } = await headCheck(link.href);
+    const { status, hops } = await headCheck(link.href, checkedLinks);
     if (status !== null && status >= 400) {
       issues.push({ sev: 'major', type: 'Content', title: 'Broken link', selector: `a[href="${link.href}"]`, page: path, wcag: null, desc: `Link "${link.text || link.href}" returns HTTP ${status}.` });
     }
@@ -43,7 +44,7 @@ async function check(page, _responseHeaders, pageUrl = '') {
   }
 
   for (const img of images) {
-    const { status, hops } = await headCheck(img.src);
+    const { status, hops } = await headCheck(img.src, checkedImages);
     if (status !== null && status >= 400) {
       issues.push({ sev: 'major', type: 'Content', title: 'Broken image', selector: `img[src="${img.src}"]`, page: path, wcag: null, desc: `Image at "${img.src}" returns HTTP ${status}.` });
     }
