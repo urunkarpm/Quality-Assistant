@@ -14,12 +14,13 @@ async function crawl(browser, seedUrl, pageLimit) {
     const page = await browser.newPage();
     let responseHeaders = {};
     page.on('response', res => {
-      if (res.url() === normalised) responseHeaders = res.headers();
+      if (res.request().isNavigationRequest()) responseHeaders = res.headers();
     });
 
     try {
       await page.goto(normalised, { waitUntil: 'networkidle', timeout: 30000 });
-    } catch {
+    } catch (err) {
+      console.warn(`[crawler] Skipping ${normalised}: ${err.message}`);
       await page.close();
       continue;
     }
