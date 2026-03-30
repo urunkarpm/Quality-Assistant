@@ -10,9 +10,11 @@ const axeSource = fs.readFileSync(
 const SEV_MAP = { critical: 'critical', serious: 'critical', moderate: 'major', minor: 'minor' };
 
 async function check(page, _responseHeaders, pageUrl = '') {
-  const urlPath = pageUrl ? new URL(pageUrl).pathname : '/';
+  let urlPath = '/';
+  try { urlPath = pageUrl ? new URL(pageUrl).pathname : '/'; } catch { urlPath = '/'; }
 
-  await page.evaluate(axeSource);
+  const isInjected = await page.evaluate(() => typeof window.axe !== 'undefined');
+  if (!isInjected) await page.evaluate(axeSource);
   const results = await page.evaluate(() => window.axe.run());
 
   return results.violations
@@ -24,7 +26,7 @@ async function check(page, _responseHeaders, pageUrl = '') {
         title:    v.description,
         selector: node.target?.[0] ?? null,
         page:     urlPath,
-        wcag:     `${v.id} (${v.tags.find(t => t.startsWith('wcag')) || 'best-practice'})`,
+        wcag:     `${v.id} (${v.tags.find(t => t.startsWith('wcag'))})`,
         desc:     `${v.help}. ${node.failureSummary || ''}`.trim(),
       }))
     );
