@@ -66,6 +66,10 @@ function createIssue(scanId, issue) {
          issue.page, issue.wcag ?? null, issue.desc);
 }
 
+function getIssue(id) {
+  return db.prepare('SELECT * FROM issues WHERE id = ?').get(id);
+}
+
 function getIssues(scanId) {
   return db.prepare('SELECT * FROM issues WHERE scan_id = ?').all(scanId);
 }
@@ -74,4 +78,4 @@ function updateIssueStatus(id, status) {
   db.prepare('UPDATE issues SET status = ? WHERE id = ?').run(status, id);
 }
 
-module.exports = { createScan, getScan, getScans, updateScan, createIssue, getIssues, updateIssueStatus };
+module.exports = { createScan, getScan, getScans, updateScan, createIssue, getIssue, getIssues, updateIssueStatus };

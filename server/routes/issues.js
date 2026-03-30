@@ -1,6 +1,6 @@
 // server/routes/issues.js
 const router = require('express').Router();
-const { getIssues, updateIssueStatus } = require('../db');
+const { getIssue, getIssues, updateIssueStatus } = require('../db');
 
 router.get('/', (req, res) => {
   const { scanId } = req.query;
@@ -13,8 +13,12 @@ router.patch('/:id', (req, res) => {
   if (!['open', 'resolved'].includes(status)) {
     return res.status(400).json({ error: 'status must be "open" or "resolved"' });
   }
-  updateIssueStatus(Number(req.params.id), status);
-  res.json({ id: Number(req.params.id), status });
+  const id = Number(req.params.id);
+  if (!getIssue(id)) {
+    return res.status(404).json({ error: 'Issue not found' });
+  }
+  updateIssueStatus(id, status);
+  res.json({ id, status });
 });
 
 module.exports = router;

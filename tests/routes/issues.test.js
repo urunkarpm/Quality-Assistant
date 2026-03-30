@@ -46,4 +46,8 @@ describe('PATCH /api/issues/:id', () => {
     const issueId = db.getIssues(scanId)[0].id;
     expect((await request(app).patch(`/api/issues/${issueId}`).send({ status: 'invalid' })).status).toBe(400);
   });
+
+  test('returns 404 for a non-existent issue id', async () => {
+    expect((await request(app).patch('/api/issues/9999').send({ status: 'resolved' })).status).toBe(404);
+  });
 });
