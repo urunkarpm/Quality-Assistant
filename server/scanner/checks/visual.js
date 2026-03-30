@@ -14,7 +14,7 @@ function contrastRatio(fg, bg) {
 }
 
 function parseRgb(str) {
-  const m = str.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+  const m = str.match(/rgba?\s*\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*(?:,\s*[\d.]+)?\s*\)/);
   return m ? [+m[1], +m[2], +m[3]] : null;
 }
 

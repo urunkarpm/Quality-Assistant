@@ -48,4 +48,12 @@ describe('visual check', () => {
     await page.close();
     issues.forEach(i => expect(i.type).toBe('Visual'));
   });
+
+  test('handles rgba foreground color for contrast check', async () => {
+    // rgba(200,200,200,0.8) on white background — low contrast
+    const page = await pageWith('<html><body style="background:#fff"><p id="rgba-test" style="color:rgba(200,200,200,0.8);font-size:16px">Semi-transparent</p></body></html>');
+    const issues = await check(page, {}, 'http://localhost/');
+    await page.close();
+    expect(issues.some(i => i.title === 'Insufficient colour contrast' && i.selector === '#rgba-test')).toBe(true);
+  });
 });
