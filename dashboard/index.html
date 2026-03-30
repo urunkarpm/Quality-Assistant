@@ -834,7 +834,7 @@
     <div class="topbar-actions">
       <span id="scan-status" style="font-size:12px;color:var(--text2);font-family:var(--mono);display:none;margin-right:8px;"></span>
       <button class="btn btn-ghost">⟳ Refresh</button>
-      <button class="btn btn-primary">⚡ New Scan</button>
+      <button class="btn btn-primary" onclick="document.getElementById('scan-url').focus()">⚡ New Scan</button>
     </div>
   </header>
 
@@ -911,11 +911,11 @@
         <span class="panel-title">Issues</span>
         <span class="panel-count">24 total</span>
         <div class="filters">
-          <button class="filter-btn active" onclick="setFilter('all',this)">All</button>
-          <button class="filter-btn" onclick="setFilter('ADA',this)">ADA</button>
-          <button class="filter-btn" onclick="setFilter('Visual',this)">Visual</button>
-          <button class="filter-btn" onclick="setFilter('Functional',this)">Functional</button>
-          <button class="filter-btn" onclick="setFilter('Content',this)">Content</button>
+          <button class="filter-btn active" data-sev="all" onclick="filterSev('all')">All</button>
+          <button class="filter-btn" data-sev="ADA" onclick="filterSev('ADA')">ADA</button>
+          <button class="filter-btn" data-sev="Visual" onclick="filterSev('Visual')">Visual</button>
+          <button class="filter-btn" data-sev="Functional" onclick="filterSev('Functional')">Functional</button>
+          <button class="filter-btn" data-sev="Content" onclick="filterSev('Content')">Content</button>
           <div class="search-box">
             <svg width="12" height="12" fill="none" viewBox="0 0 16 16"><circle cx="7" cy="7" r="5" stroke="#9E9C98" stroke-width="1.5"/><path d="M11 11l3 3" stroke="#9E9C98" stroke-width="1.5" stroke-linecap="round"/></svg>
             <input type="text" placeholder="Search issues…" oninput="filterSearch(this.value)">
@@ -981,13 +981,16 @@
       </div>
       <div class="modal-footer">
         <button id="modal-status-btn" class="btn btn-primary" onclick="toggleStatus()">Mark as Resolved</button>
-        <button class="btn btn-primary" onclick="saveNotes()">Save Notes</button>
       </div>
     </div>
   </div>
 </div>
 
 <script>
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
 let ISSUES = [];
 let activeSearch = '';
 let activeSev    = 'all';
@@ -1019,12 +1022,18 @@ async function startScan() {
 }
 
 function startPolling(scanId, pageLimit) {
+  if (pollInterval) clearInterval(pollInterval);
   const statusEl = document.getElementById('scan-status');
   const btn      = document.getElementById('scan-btn');
   statusEl.style.display = 'inline';
 
   pollInterval = setInterval(async () => {
-    const scan = await fetch(`/api/scans/${scanId}`).then(r => r.json());
+    let scan;
+    try {
+      scan = await fetch(`/api/scans/${scanId}`).then(r => r.json());
+    } catch {
+      return; // retry next interval
+    }
     if (scan.status === 'running') {
       statusEl.textContent = `Scanning… ${scan.pages_scanned || 0}/${pageLimit} pages`;
     } else {
@@ -1059,7 +1068,7 @@ function renderScore(scan) {
   const score = scan.score ?? 0;
   const fill  = document.querySelector('.score-circle .fill');
   if (fill) {
-    const circ = 2 * Math.PI * 40;
+    const circ = 2 * Math.PI * 45;
     fill.style.strokeDasharray  = circ;
     fill.style.strokeDashoffset = circ * (1 - score / 100);
   }
@@ -1100,21 +1109,21 @@ function renderIssues() {
   );
   tbody.innerHTML = filtered.map(issue => `
     <tr onclick="openModal(${issue.id})" style="cursor:pointer">
-      <td><span class="sev-badge sev-${issue.sev}">${issue.sev}</span></td>
+      <td><span class="sev-badge sev-${esc(issue.sev)}">${esc(issue.sev)}</span></td>
       <td>
-        <span class="type-badge">${issue.type}</span>
-        <span class="issue-title" style="display:block">${issue.title}</span>
-        ${issue.selector ? `<span class="issue-selector">${issue.selector}</span>` : ''}
+        <span class="type-badge">${esc(issue.type)}</span>
+        <span class="issue-title" style="display:block">${esc(issue.title)}</span>
+        ${issue.selector ? `<span class="issue-selector">${esc(issue.selector)}</span>` : ''}
       </td>
-      <td><span class="page-path">${issue.page}</span></td>
-      <td><span class="status-${issue.status}"><span class="status-dot"></span><span class="status-text">${issue.status}</span></span></td>
+      <td><span class="page-path">${esc(issue.page)}</span></td>
+      <td><span class="status-${esc(issue.status)}"><span class="status-dot"></span><span class="status-text">${esc(issue.status)}</span></span></td>
     </tr>
   `).join('');
 }
 
 function filterSev(sev) {
   activeSev = sev;
-  document.querySelectorAll('.filter-tab').forEach(t => t.classList.toggle('active', t.dataset.sev === sev));
+  document.querySelectorAll('.filter-btn').forEach(t => t.classList.toggle('active', t.dataset.sev === sev));
   renderIssues();
 }
 
@@ -1145,10 +1154,11 @@ function closeModal(force) {
 async function toggleStatus() {
   if (!activeIssue) return;
   const newStatus = activeIssue.status === 'open' ? 'resolved' : 'open';
-  await fetch(`/api/issues/${activeIssue.id}`, {
+  const resp = await fetch(`/api/issues/${activeIssue.id}`, {
     method: 'PATCH', headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ status: newStatus }),
   });
+  if (!resp.ok) { alert('Failed to update issue status'); return; }
   activeIssue.status = newStatus;
   const idx = ISSUES.findIndex(i => i.id === activeIssue.id);
   if (idx !== -1) ISSUES[idx].status = newStatus;
@@ -1172,11 +1182,11 @@ async function renderHistory() {
       <table class="issue-table">
         <thead><tr><th>URL</th><th>Score</th><th>Pages</th><th>Date</th><th>Status</th><th></th></tr></thead>
         <tbody>${scans.map(s => `<tr>
-          <td style="font-family:var(--mono);font-size:12px">${s.url}</td>
-          <td><strong style="color:var(--accent)">${s.score ?? '—'}</strong></td>
-          <td>${s.pages_scanned ?? '—'}</td>
+          <td style="font-family:var(--mono);font-size:12px">${esc(s.url)}</td>
+          <td><strong style="color:var(--accent)">${esc(s.score ?? '—')}</strong></td>
+          <td>${esc(s.pages_scanned ?? '—')}</td>
           <td class="time-ago">${new Date(s.started_at * 1000).toLocaleString()}</td>
-          <td>${s.status}</td>
+          <td>${esc(s.status)}</td>
           <td>${s.status === 'complete' ? `<button class="btn btn-ghost" onclick="loadScan(${s.id})">View</button>` : ''}</td>
         </tr>`).join('')}</tbody>
       </table>
