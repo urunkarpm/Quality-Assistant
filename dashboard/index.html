@@ -914,8 +914,10 @@
           <button class="filter-btn active" data-sev="all" onclick="filterSev('all')">All</button>
           <button class="filter-btn" data-sev="ADA" onclick="filterSev('ADA')">ADA</button>
           <button class="filter-btn" data-sev="Visual" onclick="filterSev('Visual')">Visual</button>
-          <button class="filter-btn" data-sev="Functional" onclick="filterSev('Functional')">Functional</button>
           <button class="filter-btn" data-sev="Content" onclick="filterSev('Content')">Content</button>
+          <button class="filter-btn" data-sev="SEO" onclick="filterSev('SEO')">SEO</button>
+          <button class="filter-btn" data-sev="Performance" onclick="filterSev('Performance')">Performance</button>
+          <button class="filter-btn" data-sev="Security" onclick="filterSev('Security')">Security</button>
           <div class="search-box">
             <svg width="12" height="12" fill="none" viewBox="0 0 16 16"><circle cx="7" cy="7" r="5" stroke="#9E9C98" stroke-width="1.5"/><path d="M11 11l3 3" stroke="#9E9C98" stroke-width="1.5" stroke-linecap="round"/></svg>
             <input type="text" placeholder="Search issues…" oninput="filterSearch(this.value)">
@@ -1104,7 +1106,7 @@ function renderIssues() {
   const tbody = document.getElementById('issue-tbody');
   if (!tbody) return;
   const filtered = ISSUES.filter(i =>
-    (activeSev === 'all' || i.sev === activeSev) &&
+    (activeSev === 'all' || i.type === activeSev) &&
     (!activeSearch || i.title.toLowerCase().includes(activeSearch) || (i.page && i.page.includes(activeSearch)))
   );
   tbody.innerHTML = filtered.map(issue => `
