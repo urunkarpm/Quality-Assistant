@@ -23,17 +23,12 @@ async function runScan(url, pageLimit, onIssue) {
     const pages = await crawl(browser, url, pageLimit);
 
     for (const { url: pageUrl, page, responseHeaders } of pages) {
-      for (const fn of [adaCheck, visualCheck, contentCheck, seoCheck, securityCheck]) {
+      for (const fn of [adaCheck, visualCheck, contentCheck, seoCheck, securityCheck, perfCheck]) {
         const found = await fn(page, responseHeaders, pageUrl);
         for (const issue of found) {
           allIssues.push(issue);
           if (onIssue) onIssue(issue);
         }
-      }
-      // perf: null timing so it reads real navigation data from the page object
-      for (const issue of await perfCheck(page, responseHeaders, pageUrl, null)) {
-        allIssues.push(issue);
-        if (onIssue) onIssue(issue);
       }
       await page.close();
     }
