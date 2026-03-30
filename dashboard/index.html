@@ -785,30 +785,35 @@
   </div>
 
   <div class="sidebar-site">
-    <label>Active Site</label>
-    <select class="site-select">
-      <option>app.example.com</option>
-      <option>staging.example.com</option>
-      <option>+ Add new site</option>
-    </select>
+    <label>SCAN URL</label>
+    <input id="scan-url" type="url" placeholder="https://example.com"
+      style="width:100%;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:6px;padding:8px 10px;color:#fff;font-family:var(--sans);font-size:12px;margin-bottom:8px;box-sizing:border-box;">
+    <div style="display:flex;gap:6px;align-items:center;">
+      <select id="scan-pages"
+        style="flex:1;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:6px;padding:7px 8px;color:#fff;font-size:12px;font-family:var(--sans);appearance:none;">
+        <option value="1">1 page</option>
+        <option value="5" selected>5 pages</option>
+        <option value="10">10 pages</option>
+        <option value="25">25 pages</option>
+        <option value="50">50 pages</option>
+      </select>
+      <button id="scan-btn" onclick="startScan()"
+        style="background:var(--accent);color:#fff;border:none;border-radius:6px;padding:7px 12px;font-size:12px;font-weight:500;cursor:pointer;font-family:var(--sans);white-space:nowrap;">
+        Run Scan
+      </button>
+    </div>
   </div>
 
   <nav class="sidebar-nav">
-    <a class="nav-item active">
+    <a class="nav-item active" data-view="dashboard" onclick="switchView('dashboard')">
       <span class="icon">◈</span> Dashboard
     </a>
-    <a class="nav-item" onclick="switchView('issues')">
+    <a class="nav-item" data-view="issues" onclick="switchView('issues')">
       <span class="icon">⚑</span> Issues
-      <span class="nav-badge">8</span>
+      <span class="nav-badge">0</span>
     </a>
-    <a class="nav-item">
-      <span class="icon">⊞</span> Pages
-    </a>
-    <a class="nav-item">
+    <a class="nav-item" data-view="scans" onclick="switchView('scans')">
       <span class="icon">⊙</span> Scans
-    </a>
-    <a class="nav-item">
-      <span class="icon">↯</span> ADA Report
     </a>
   </nav>
 
@@ -827,12 +832,13 @@
       <span class="page-subtitle">app.example.com · last scan 2h ago</span>
     </div>
     <div class="topbar-actions">
+      <span id="scan-status" style="font-size:12px;color:var(--text2);font-family:var(--mono);display:none;margin-right:8px;"></span>
       <button class="btn btn-ghost">⟳ Refresh</button>
       <button class="btn btn-primary">⚡ New Scan</button>
     </div>
   </header>
 
-  <div class="content">
+  <div class="content" id="dashboard-view">
 
     <!-- ADA Score hero -->
     <div class="score-hero">
@@ -933,6 +939,7 @@
     </div>
 
   </div>
+  <div id="scans-view" style="display:none;padding:28px 32px;"></div>
 </main>
 
 <!-- ── ISSUE DETAIL MODAL ── -->
@@ -973,7 +980,7 @@
         <textarea placeholder="Add notes or reproduction steps…" id="modal-notes-text"></textarea>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-ghost" id="modal-status-btn" onclick="toggleStatus()">Mark as Resolved</button>
+        <button id="modal-status-btn" class="btn btn-primary" onclick="toggleStatus()">Mark as Resolved</button>
         <button class="btn btn-primary" onclick="saveNotes()">Save Notes</button>
       </div>
     </div>
@@ -981,119 +988,220 @@
 </div>
 
 <script>
-const ISSUES = [
-  { id:1, sev:'critical', type:'ADA',        title:'Missing alt text on hero image',        selector:'#hero > img.banner',              page:'/dashboard',  time:'2h ago', status:'open',     wcag:'image-alt (1.1.1)', desc:'The hero image has no alternative text. Screen readers cannot convey its content to visually impaired users.' },
-  { id:2, sev:'critical', type:'ADA',        title:'Form inputs missing accessible labels',  selector:'form#checkout input[type="email"]',page:'/checkout',   time:'3h ago', status:'open',     wcag:'label (1.3.1)',     desc:'Email and password inputs are not associated with a visible or hidden label element.' },
-  { id:3, sev:'critical', type:'ADA',        title:'Keyboard focus not visible on nav links', selector:'nav.main-nav a',                  page:'/landing',    time:'3h ago', status:'open',     wcag:'focus-visible (2.4.7)',desc:'Navigation links have no visible focus ring when tabbing through the page.' },
-  { id:4, sev:'critical', type:'ADA',        title:'Color contrast ratio below 4.5:1',        selector:'.cta-button',                     page:'/landing',    time:'4h ago', status:'open',     wcag:'color-contrast (1.4.3)',desc:'CTA button text (#FFFFFF on #F5A623) has a contrast ratio of 2.8:1. Minimum required is 4.5:1.' },
-  { id:5, sev:'critical', type:'ADA',        title:'iframe missing title attribute',          selector:'iframe.chat-widget',              page:'/dashboard',  time:'5h ago', status:'open',     wcag:'frame-title (2.4.1)',  desc:'The chat iframe has no title attribute, making it inaccessible to screen reader users.' },
-  { id:6, sev:'major',    type:'Visual',     title:'Low contrast on secondary text',          selector:'.card .subtitle',                 page:'/dashboard',  time:'5h ago', status:'open',     wcag:null,                  desc:'Secondary text in cards uses #C0C0C0 on white — visually weak and hard to read for low-vision users.' },
-  { id:7, sev:'major',    type:'Functional', title:'Modal dialog not trapping focus',         selector:'#subscription-modal',             page:'/dashboard',  time:'6h ago', status:'open',     wcag:'dialog (4.1.2)',      desc:'Tab key escapes the modal dialog, cycling through page content in the background.' },
-  { id:8, sev:'major',    type:'ADA',        title:'Skip navigation link missing',            selector:'body > :first-child',             page:'/landing',    time:'7h ago', status:'open',     wcag:'bypass (2.4.1)',      desc:'No skip-to-content mechanism exists, forcing keyboard users to tab through the entire header on every page.' },
-  { id:9, sev:'major',    type:'Visual',     title:'Images distorted at 200% zoom',           selector:'.product-grid img',               page:'/shop',       time:'8h ago', status:'open',     wcag:'reflow (1.4.10)',     desc:'Product images overflow their containers and become distorted when browser zoom is set to 200%.' },
-  { id:10,sev:'minor',    type:'Content',    title:'Broken link in footer nav',               selector:'footer a[href="/terms"]',         page:'/home',       time:'1d ago', status:'resolved', wcag:null,                  desc:'The Terms of Service link in the footer returns a 404 error.' },
-  { id:11,sev:'minor',    type:'ADA',        title:'Lang attribute missing on html element',  selector:'html',                            page:'/all',        time:'1d ago', status:'open',     wcag:'html-has-lang (3.1.1)',desc:'The <html> element is missing a lang attribute, preventing screen readers from using the correct language profile.' },
-  { id:12,sev:'minor',    type:'Content',    title:'404 image on product card',               selector:'.product-card:nth-child(3) img',  page:'/shop',       time:'2d ago', status:'resolved', wcag:null,                  desc:'Third product card image returns a 404, showing a broken image icon.' },
-];
-
-let activeFilter = 'all';
+let ISSUES = [];
 let activeSearch = '';
-let activeIssue = null;
+let activeSev    = 'all';
+let activeIssue  = null;
+let pollInterval = null;
+
+// SCAN LAUNCHER
+
+async function startScan() {
+  const url       = document.getElementById('scan-url').value.trim();
+  const pageLimit = parseInt(document.getElementById('scan-pages').value, 10);
+  if (!url) { alert('Enter a URL to scan.'); return; }
+
+  const btn = document.getElementById('scan-btn');
+  btn.disabled = true; btn.textContent = 'Starting…';
+
+  try {
+    const res = await fetch('/api/scans', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url, pageLimit }),
+    });
+    if (!res.ok) { const e = await res.json(); throw new Error(e.error); }
+    const { scanId } = await res.json();
+    startPolling(scanId, pageLimit);
+  } catch (err) {
+    alert('Failed to start scan: ' + err.message);
+    btn.disabled = false; btn.textContent = 'Run Scan';
+  }
+}
+
+function startPolling(scanId, pageLimit) {
+  const statusEl = document.getElementById('scan-status');
+  const btn      = document.getElementById('scan-btn');
+  statusEl.style.display = 'inline';
+
+  pollInterval = setInterval(async () => {
+    const scan = await fetch(`/api/scans/${scanId}`).then(r => r.json());
+    if (scan.status === 'running') {
+      statusEl.textContent = `Scanning… ${scan.pages_scanned || 0}/${pageLimit} pages`;
+    } else {
+      clearInterval(pollInterval);
+      statusEl.style.display = 'none';
+      btn.disabled = false; btn.textContent = 'Run Scan';
+      if (scan.status === 'complete') await loadScan(scanId);
+      else alert('Scan failed: ' + (scan.error || 'unknown error'));
+    }
+  }, 2000);
+}
+
+// DATA LOADING
+
+async function loadScan(scanId) {
+  const [scan, issues] = await Promise.all([
+    fetch(`/api/scans/${scanId}`).then(r => r.json()),
+    fetch(`/api/issues?scanId=${scanId}`).then(r => r.json()),
+  ]);
+  ISSUES = issues;
+  renderScore(scan);
+  renderStatCards();
+  renderIssues();
+  const el = document.querySelector('.page-subtitle');
+  if (el) el.textContent = `${scan.url} · scanned ${new Date(scan.started_at * 1000).toLocaleString()}`;
+  switchView('dashboard');
+}
+
+// RENDER
+
+function renderScore(scan) {
+  const score = scan.score ?? 0;
+  const fill  = document.querySelector('.score-circle .fill');
+  if (fill) {
+    const circ = 2 * Math.PI * 40;
+    fill.style.strokeDasharray  = circ;
+    fill.style.strokeDashoffset = circ * (1 - score / 100);
+  }
+  const numEl = document.querySelector('.score-label .num');
+  if (numEl) numEl.textContent = score;
+
+  const barsContainer = document.querySelector('.score-bars');
+  if (barsContainer) {
+    barsContainer.innerHTML = ['ADA', 'Visual', 'Content', 'SEO', 'Performance', 'Security'].map(type => {
+      const t = ISSUES.filter(i => i.type === type);
+      const s = Math.max(0, 100
+        - t.filter(i => i.sev === 'critical').length * 10
+        - t.filter(i => i.sev === 'major').length * 4
+        - t.filter(i => i.sev === 'minor').length);
+      return `<div class="bar-row"><span class="bar-label">${type}</span><div class="bar-track"><div class="bar-fill" style="width:${s}%"></div></div><span class="bar-val">${s}</span></div>`;
+    }).join('');
+  }
+}
+
+function renderStatCards() {
+  const counts = { critical: 0, major: 0, minor: 0 };
+  ISSUES.forEach(i => { if (counts[i.sev] !== undefined) counts[i.sev]++; });
+  const resolved = ISSUES.filter(i => i.status === 'resolved').length;
+  document.querySelectorAll('.stat-card').forEach((card, idx) => {
+    const el = card.querySelector('.stat-num');
+    if (el) el.textContent = ['critical','major','minor','pass'].map((k,i) => i === 3 ? resolved : counts[k])[idx];
+  });
+  const badge = document.querySelector('.nav-badge');
+  if (badge) badge.textContent = counts.critical;
+}
 
 function renderIssues() {
   const tbody = document.getElementById('issue-tbody');
-  let filtered = ISSUES.filter(i => {
-    const matchType = activeFilter === 'all' || i.type === activeFilter;
-    const matchSearch = !activeSearch || i.title.toLowerCase().includes(activeSearch) || i.page.includes(activeSearch);
-    return matchType && matchSearch;
-  });
-
-  if (!filtered.length) {
-    tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><h3>No issues found</h3><p>Try adjusting your filters.</p></div></td></tr>`;
-    return;
-  }
-
+  if (!tbody) return;
+  const filtered = ISSUES.filter(i =>
+    (activeSev === 'all' || i.sev === activeSev) &&
+    (!activeSearch || i.title.toLowerCase().includes(activeSearch) || (i.page && i.page.includes(activeSearch)))
+  );
   tbody.innerHTML = filtered.map(issue => `
-    <tr class="${issue.status === 'resolved' ? 'resolved' : ''}" onclick="openModal(${issue.id})">
-      <td><span class="sev-badge sev-${issue.sev}">${issue.sev.toUpperCase()}</span></td>
-      <td><span class="type-badge">${issue.type}</span></td>
+    <tr onclick="openModal(${issue.id})" style="cursor:pointer">
+      <td><span class="sev-badge sev-${issue.sev}">${issue.sev}</span></td>
       <td>
-        <span class="issue-title">${issue.title}</span>
-        <span class="issue-selector">${issue.selector}</span>
+        <span class="type-badge">${issue.type}</span>
+        <span class="issue-title" style="display:block">${issue.title}</span>
+        ${issue.selector ? `<span class="issue-selector">${issue.selector}</span>` : ''}
       </td>
       <td><span class="page-path">${issue.page}</span></td>
-      <td><span class="time-ago">${issue.time}</span></td>
-      <td>
-        <span class="status-${issue.status}">
-          <span class="status-dot"></span>
-          <span class="status-text">${issue.status === 'open' ? 'Open' : 'Resolved'}</span>
-        </span>
-      </td>
+      <td><span class="status-${issue.status}"><span class="status-dot"></span><span class="status-text">${issue.status}</span></span></td>
     </tr>
   `).join('');
 }
 
-function setFilter(type, btn) {
-  activeFilter = type;
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
+function filterSev(sev) {
+  activeSev = sev;
+  document.querySelectorAll('.filter-tab').forEach(t => t.classList.toggle('active', t.dataset.sev === sev));
   renderIssues();
 }
 
-function filterSearch(val) {
-  activeSearch = val.toLowerCase();
-  renderIssues();
-}
+function filterSearch(val) { activeSearch = val.toLowerCase(); renderIssues(); }
+
+// MODAL
 
 function openModal(id) {
   activeIssue = ISSUES.find(i => i.id === id);
   if (!activeIssue) return;
-
-  document.getElementById('modal-title').textContent = activeIssue.title;
-  document.getElementById('modal-sev').innerHTML = `<span class="sev-badge sev-${activeIssue.sev}">${activeIssue.sev.toUpperCase()}</span>`;
-  document.getElementById('modal-meta').innerHTML = `
-    <span class="type-badge">${activeIssue.type}</span>
-    <span class="page-path">${activeIssue.page}</span>
-    <span class="time-ago">${activeIssue.time}</span>
-  `;
-  document.getElementById('modal-selector').textContent = activeIssue.selector;
-  document.getElementById('modal-desc').textContent = activeIssue.desc;
-  document.getElementById('modal-notes-text').value = '';
-
-  const wcagRow = document.getElementById('modal-wcag-row');
-  if (activeIssue.wcag) {
-    wcagRow.style.display = '';
-    document.getElementById('modal-wcag').innerHTML = `<span class="wcag-chip">⊙ ${activeIssue.wcag}</span>`;
-  } else {
-    wcagRow.style.display = 'none';
-  }
-
-  const statusBtn = document.getElementById('modal-status-btn');
-  statusBtn.textContent = activeIssue.status === 'open' ? 'Mark as Resolved' : 'Reopen Issue';
-
-  document.getElementById('modal').classList.add('open');
+  document.getElementById('modal-title').textContent    = activeIssue.title;
+  document.getElementById('modal-selector').textContent = activeIssue.selector || '—';
+  document.getElementById('modal-desc').textContent     = activeIssue.desc;
+  const wcagEl = document.getElementById('modal-wcag');
+  if (wcagEl) { wcagEl.style.display = activeIssue.wcag ? '' : 'none'; if (activeIssue.wcag) wcagEl.textContent = activeIssue.wcag; }
+  const btn = document.getElementById('modal-status-btn');
+  if (btn) btn.textContent = activeIssue.status === 'open' ? 'Mark as Resolved' : 'Reopen Issue';
+  document.querySelector('.modal-overlay').classList.add('open');
 }
 
 function closeModal(force) {
-  if (force === true || force?.target === document.getElementById('modal')) {
-    document.getElementById('modal').classList.remove('open');
+  if (force === true || force?.target === document.querySelector('.modal-overlay')) {
+    document.querySelector('.modal-overlay').classList.remove('open');
+    activeIssue = null;
   }
 }
 
-function toggleStatus() {
+async function toggleStatus() {
   if (!activeIssue) return;
-  activeIssue.status = activeIssue.status === 'open' ? 'resolved' : 'open';
-  document.getElementById('modal-status-btn').textContent = activeIssue.status === 'open' ? 'Mark as Resolved' : 'Reopen Issue';
+  const newStatus = activeIssue.status === 'open' ? 'resolved' : 'open';
+  await fetch(`/api/issues/${activeIssue.id}`, {
+    method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ status: newStatus }),
+  });
+  activeIssue.status = newStatus;
+  const idx = ISSUES.findIndex(i => i.id === activeIssue.id);
+  if (idx !== -1) ISSUES[idx].status = newStatus;
+  document.getElementById('modal-status-btn').textContent = newStatus === 'open' ? 'Mark as Resolved' : 'Reopen Issue';
   renderIssues();
+  renderStatCards();
 }
 
-function saveNotes() {
-  closeModal(true);
+// SCAN HISTORY
+
+async function renderHistory() {
+  const scans = await fetch('/api/scans').then(r => r.json());
+  const area  = document.getElementById('scans-view');
+  if (!area) return;
+  area.innerHTML = `
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">Scan History</span>
+        <span class="panel-count">${scans.length} scan${scans.length !== 1 ? 's' : ''}</span>
+      </div>
+      <table class="issue-table">
+        <thead><tr><th>URL</th><th>Score</th><th>Pages</th><th>Date</th><th>Status</th><th></th></tr></thead>
+        <tbody>${scans.map(s => `<tr>
+          <td style="font-family:var(--mono);font-size:12px">${s.url}</td>
+          <td><strong style="color:var(--accent)">${s.score ?? '—'}</strong></td>
+          <td>${s.pages_scanned ?? '—'}</td>
+          <td class="time-ago">${new Date(s.started_at * 1000).toLocaleString()}</td>
+          <td>${s.status}</td>
+          <td>${s.status === 'complete' ? `<button class="btn btn-ghost" onclick="loadScan(${s.id})">View</button>` : ''}</td>
+        </tr>`).join('')}</tbody>
+      </table>
+    </div>`;
+}
+
+// VIEW SWITCHING
+
+function switchView(view) {
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const nav = document.querySelector(`[data-view="${view}"]`);
+  if (nav) nav.classList.add('active');
+  const dash  = document.getElementById('dashboard-view');
+  const scans = document.getElementById('scans-view');
+  if (view === 'scans') {
+    if (dash)  dash.style.display  = 'none';
+    if (scans) scans.style.display = '';
+    renderHistory();
+  } else {
+    if (dash)  dash.style.display  = '';
+    if (scans) scans.style.display = 'none';
+  }
 }
 
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(true); });
-
-renderIssues();
 </script>
 </body>
 </html>
