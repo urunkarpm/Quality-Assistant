@@ -4,6 +4,7 @@ const { createScan, getScan, getScans, updateScan, createIssue, saveScreenshot }
 const { runScan, computeScore } = require('../scanner/runner');
 
 let scanRunning = false;
+const scanLogs = new Map(); // scanId -> string[]
 
 router.get('/', (_req, res) => res.json(getScans()));
 
@@ -25,12 +26,14 @@ router.post('/', (req, res) => {
   scanRunning = true;
 
   const scanId = createScan(url, pageLimit);
+  scanLogs.set(scanId, []);
 
   runScan(
     url,
     pageLimit,
     issue => createIssue(scanId, issue),
-    (pageUrl, dataUrl) => saveScreenshot(scanId, pageUrl, dataUrl)
+    (pageUrl, dataUrl) => saveScreenshot(scanId, pageUrl, dataUrl),
+    msg => { const log = scanLogs.get(scanId); if (log) log.push(msg); }
   )
     .then(({ issues, pagesScanned }) => {
       updateScan(scanId, { status: 'complete', score: computeScore(issues), pages_scanned: pagesScanned, finished_at: Math.floor(Date.now() / 1000) });
@@ -41,6 +44,12 @@ router.post('/', (req, res) => {
     .finally(() => { scanRunning = false; });
 
   res.status(202).json({ scanId });
+});
+
+router.get('/:id/progress', (req, res) => {
+  const scanId = Number(req.params.id);
+  const log = scanLogs.get(scanId) ?? [];
+  res.json({ log });
 });
 
 module.exports = router;

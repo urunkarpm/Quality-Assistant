@@ -300,8 +300,62 @@
   }
 
   .score-meta {
-    flex: 1;
+    flex: 2;
   }
+
+  .scan-log {
+    flex: 1;
+    min-width: 0;
+    max-height: 160px;
+    display: none;
+    flex-direction: column;
+    gap: 0;
+    border-left: 1px solid var(--border);
+    padding-left: 24px;
+  }
+  .scan-log.active { display: flex; }
+  .scan-log-title {
+    font-size: 10px;
+    font-family: var(--mono);
+    color: var(--text3);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .scan-log-title::before {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: pulse 1s ease-in-out infinite;
+    flex-shrink: 0;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.3; }
+  }
+  .scan-log-entries {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    scrollbar-width: none;
+  }
+  .scan-log-entries::-webkit-scrollbar { display: none; }
+  .scan-log-entry {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text2);
+    line-height: 1.4;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .scan-log-entry.new { color: var(--text); }
   .score-meta h2 {
     font-family: var(--serif);
     font-size: 18px;
@@ -879,6 +933,11 @@
           </div>
         </div>
       </div>
+
+      <div class="scan-log" id="scan-log">
+        <div class="scan-log-title">Scan in progress</div>
+        <div class="scan-log-entries" id="scan-log-entries"></div>
+      </div>
     </div>
 
     <!-- Stats row -->
@@ -1024,16 +1083,38 @@ async function startScan() {
   }
 }
 
+let logSeenCount = 0;
+
 function startPolling(scanId, pageLimit) {
   if (pollInterval) clearInterval(pollInterval);
-  const statusEl = document.getElementById('scan-status');
-  const btn      = document.getElementById('scan-btn');
+  const statusEl  = document.getElementById('scan-status');
+  const btn       = document.getElementById('scan-btn');
+  const logPanel  = document.getElementById('scan-log');
+  const logEl     = document.getElementById('scan-log-entries');
   statusEl.style.display = 'inline';
+  logPanel.classList.add('active');
+  logEl.textContent = '';
+  logSeenCount = 0;
 
   pollInterval = setInterval(async () => {
     let scan;
     try {
-      scan = await fetch(`/api/scans/${scanId}`).then(r => r.json());
+      [scan] = await Promise.all([
+        fetch(`/api/scans/${scanId}`).then(r => r.json()),
+        fetch(`/api/scans/${scanId}/progress`).then(r => r.json()).then(({ log }) => {
+          // Append only new entries
+          for (let i = logSeenCount; i < log.length; i++) {
+            const entry = document.createElement('div');
+            entry.className = 'scan-log-entry new';
+            entry.textContent = log[i];
+            logEl.appendChild(entry);
+            setTimeout(() => entry.classList.remove('new'), 800);
+            logSeenCount++;
+          }
+          // Auto-scroll to bottom
+          logEl.scrollTop = logEl.scrollHeight;
+        }).catch(() => {}),
+      ]);
     } catch {
       return; // retry next interval
     }
@@ -1042,6 +1123,7 @@ function startPolling(scanId, pageLimit) {
     } else {
       clearInterval(pollInterval);
       statusEl.style.display = 'none';
+      logPanel.classList.remove('active');
       btn.disabled = false; btn.textContent = 'Run Scan';
       if (scan.status === 'complete') await loadScan(scanId);
       else alert('Scan failed: ' + (scan.error || 'unknown error'));
