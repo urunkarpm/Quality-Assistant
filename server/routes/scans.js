@@ -1,6 +1,6 @@
 // server/routes/scans.js
 const router = require('express').Router();
-const { createScan, getScan, getScans, updateScan, createIssue } = require('../db');
+const { createScan, getScan, getScans, updateScan, createIssue, saveScreenshot } = require('../db');
 const { runScan, computeScore } = require('../scanner/runner');
 
 let scanRunning = false;
@@ -26,7 +26,12 @@ router.post('/', (req, res) => {
 
   const scanId = createScan(url, pageLimit);
 
-  runScan(url, pageLimit, issue => createIssue(scanId, issue))
+  runScan(
+    url,
+    pageLimit,
+    issue => createIssue(scanId, issue),
+    (pageUrl, dataUrl) => saveScreenshot(scanId, pageUrl, dataUrl)
+  )
     .then(({ issues, pagesScanned }) => {
       updateScan(scanId, { status: 'complete', score: computeScore(issues), pages_scanned: pagesScanned, finished_at: Math.floor(Date.now() / 1000) });
     })

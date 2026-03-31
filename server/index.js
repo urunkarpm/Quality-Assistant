@@ -8,8 +8,9 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '../dashboard')));
 
-app.use('/api/scans',  require('./routes/scans'));
-app.use('/api/issues', require('./routes/issues'));
+app.use('/api/scans',       require('./routes/scans'));
+app.use('/api/issues',      require('./routes/issues'));
+app.use('/api/screenshots', require('./routes/screenshots'));
 
 app.get('*', (_req, res) => {
   res.sendFile(path.join(__dirname, '../dashboard/index.html'));
