@@ -1238,6 +1238,32 @@ function switchView(view) {
 }
 
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(true); });
+
+// AUTO-LOAD latest completed scan on page load
+document.addEventListener('DOMContentLoaded', async () => {
+  try {
+    const scans = await fetch('/api/scans').then(r => r.json());
+    const latest = scans.find(s => s.status === 'complete');
+    if (latest) {
+      await loadScan(latest.id);
+    } else {
+      // No scans yet — clear the hardcoded placeholder values
+      const numEl = document.querySelector('.score-label .num');
+      if (numEl) numEl.textContent = '—';
+      document.querySelectorAll('.stat-card .stat-num').forEach(el => el.textContent = '—');
+      const barsContainer = document.querySelector('.score-bars');
+      if (barsContainer) {
+        while (barsContainer.firstChild) barsContainer.removeChild(barsContainer.firstChild);
+        const msg = document.createElement('p');
+        msg.style.cssText = 'color:var(--text3);font-size:12px';
+        msg.textContent = 'Run a scan to see results.';
+        barsContainer.appendChild(msg);
+      }
+      const subtitle = document.querySelector('.page-subtitle');
+      if (subtitle) subtitle.textContent = 'No scans yet';
+    }
+  } catch { /* server not ready — leave page as-is */ }
+});
 </script>
 </body>
 </html>
