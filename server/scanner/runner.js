@@ -15,7 +15,60 @@ function computeScore(issues) {
   return Math.max(0, 100 - c * 10 - m * 4 - n);
 }
 
-async function runScan(url, pageLimit, onIssue, onScreenshot, onProgress) {
+const SEV_COLOR = { critical: '#ef4444', major: '#f97316', minor: '#eab308' };
+const PADDING = 56; // px around element in cropped shot
+
+async function captureElementScreenshot(page, selector, sev) {
+  try {
+    const locator = page.locator(selector).first();
+    const bbox    = await locator.boundingBox();
+    if (!bbox || (bbox.width === 0 && bbox.height === 0)) return null;
+
+    const color = SEV_COLOR[sev] || '#eab308';
+
+    // Inject highlight overlay
+    await page.evaluate(({ sel, col }) => {
+      window.__qaBox = document.createElement('div');
+      try {
+        const el   = document.querySelector(sel);
+        if (!el) return;
+        const r    = el.getBoundingClientRect();
+        const box  = window.__qaBox;
+        box.style.cssText = [
+          'position:fixed',
+          `left:${r.left - 3}px`, `top:${r.top - 3}px`,
+          `width:${r.width + 6}px`, `height:${r.height + 6}px`,
+          `outline:3px solid ${col}`,
+          `background:${col}1a`,
+          'z-index:2147483647',
+          'pointer-events:none',
+          'box-sizing:border-box',
+          'border-radius:2px',
+        ].join(';');
+        document.documentElement.appendChild(box);
+      } catch {}
+    }, { sel: selector, col: color });
+
+    const vp      = page.viewportSize();
+    const vpW     = vp ? vp.width  : 1280;
+    const vpH     = vp ? vp.height : 800;
+    const x       = Math.max(0, bbox.x - PADDING);
+    const y       = Math.max(0, bbox.y - PADDING);
+    const width   = Math.min(vpW - x, bbox.width  + PADDING * 2);
+    const height  = Math.min(vpH - y, bbox.height + PADDING * 2);
+
+    const buf = await page.screenshot({ clip: { x, y, width, height }, type: 'jpeg', quality: 85 });
+
+    // Remove overlay
+    await page.evaluate(() => { if (window.__qaBox) { window.__qaBox.remove(); window.__qaBox = null; } });
+
+    return `data:image/jpeg;base64,${buf.toString('base64')}`;
+  } catch {
+    return null;
+  }
+}
+
+async function runScan(url, pageLimit, onIssue, onIssueScreenshot, onProgress) {
   const browser   = await chromium.launch();
   const allIssues = [];
 
@@ -35,13 +88,17 @@ async function runScan(url, pageLimit, onIssue, onScreenshot, onProgress) {
 
     for (const { url: pageUrl, page, responseHeaders } of pages) {
       try {
+        // Collect issues and their DB IDs
+        const pageIssues = []; // { issue, id }
+
         for (const { fn, name } of checks) {
           if (onProgress) onProgress(`[${pageUrl}] Checking ${name}…`);
           try {
             const found = await fn(page, responseHeaders, pageUrl);
             for (const issue of found) {
               allIssues.push(issue);
-              if (onIssue) onIssue(issue);
+              const issueId = onIssue ? onIssue(issue) : null;
+              pageIssues.push({ issue, id: issueId });
             }
             if (onProgress) onProgress(`[${pageUrl}] ${name} — ${found.length} issue${found.length !== 1 ? 's' : ''}`);
           } catch (err) {
@@ -49,56 +106,25 @@ async function runScan(url, pageLimit, onIssue, onScreenshot, onProgress) {
             if (onProgress) onProgress(`[${pageUrl}] ${name} — error`);
           }
         }
-        if (onScreenshot) {
-          if (onProgress) onProgress(`[${pageUrl}] Capturing annotated screenshot…`);
-          try {
-            // Highlight all issue selectors found on this page
-            const selectors = allIssues
-              .filter(i => i.page === pageUrl && i.selector)
-              .map(i => i.selector);
 
-            await page.evaluate((sels) => {
-              window.__qaOverlays = [];
-              const SEV_COLORS = {};
-              sels.forEach(({ sel, sev }) => {
-                const color = sev === 'critical' ? '#ef4444'
-                            : sev === 'major'    ? '#f97316'
-                            :                      '#eab308';
-                try {
-                  document.querySelectorAll(sel).forEach(el => {
-                    const r = el.getBoundingClientRect();
-                    if (r.width === 0 && r.height === 0) return;
-                    const box = document.createElement('div');
-                    box.style.cssText = [
-                      'position:fixed',
-                      `left:${r.left}px`, `top:${r.top}px`,
-                      `width:${r.width}px`, `height:${r.height}px`,
-                      `outline:3px solid ${color}`,
-                      `background:${color}22`,
-                      'z-index:2147483647',
-                      'pointer-events:none',
-                      'box-sizing:border-box',
-                    ].join(';');
-                    document.documentElement.appendChild(box);
-                    window.__qaOverlays.push(box);
-                  });
-                } catch {}
-              });
-            }, selectors.map(sel => ({ sel, sev: (allIssues.find(i => i.selector === sel) || {}).sev || 'minor' })));
-
-            const buf = await page.screenshot({ type: 'jpeg', quality: 75 });
-
-            // Remove overlays
-            await page.evaluate(() => {
-              (window.__qaOverlays || []).forEach(el => el.remove());
-              window.__qaOverlays = [];
-            });
-
-            onScreenshot(pageUrl, `data:image/jpeg;base64,${buf.toString('base64')}`);
-            if (onProgress) onProgress(`[${pageUrl}] Screenshot saved (${selectors.length} issue${selectors.length !== 1 ? 's' : ''} highlighted)`);
-          } catch (err) {
-            console.warn(`[runner] screenshot failed on ${pageUrl}: ${err.message}`);
+        // Capture per-issue cropped screenshots (deduplicate by selector)
+        if (onIssueScreenshot) {
+          const cache = new Map(); // selector -> dataUrl
+          let captured = 0;
+          if (onProgress) onProgress(`[${pageUrl}] Capturing element screenshots…`);
+          for (const { issue, id } of pageIssues) {
+            if (!id || !issue.selector) continue;
+            let dataUrl = cache.get(issue.selector);
+            if (dataUrl === undefined) {
+              dataUrl = await captureElementScreenshot(page, issue.selector, issue.sev);
+              cache.set(issue.selector, dataUrl);
+            }
+            if (dataUrl) {
+              onIssueScreenshot(id, dataUrl);
+              captured++;
+            }
           }
+          if (onProgress) onProgress(`[${pageUrl}] ${captured} element screenshot${captured !== 1 ? 's' : ''} saved`);
         }
       } finally {
         await page.close();

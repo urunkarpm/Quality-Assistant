@@ -1,6 +1,6 @@
 // server/routes/scans.js
 const router = require('express').Router();
-const { createScan, getScan, getScans, updateScan, createIssue, saveScreenshot } = require('../db');
+const { createScan, getScan, getScans, updateScan, createIssue, saveIssueScreenshot } = require('../db');
 const { runScan, computeScore } = require('../scanner/runner');
 
 let scanRunning = false;
@@ -32,7 +32,7 @@ router.post('/', (req, res) => {
     url,
     pageLimit,
     issue => createIssue(scanId, issue),
-    (pageUrl, dataUrl) => saveScreenshot(scanId, pageUrl, dataUrl),
+    (issueId, dataUrl) => saveIssueScreenshot(issueId, dataUrl),
     msg => { const log = scanLogs.get(scanId); if (log) log.push(msg); }
   )
     .then(({ issues, pagesScanned }) => {

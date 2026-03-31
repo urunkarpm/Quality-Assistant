@@ -12,7 +12,6 @@ if (dbPath !== ':memory:') {
 
 const db = new Database(dbPath);
 
-// Create tables using prepare().run() for each statement
 db.prepare(`CREATE TABLE IF NOT EXISTS scans (
   id            INTEGER PRIMARY KEY AUTOINCREMENT,
   url           TEXT    NOT NULL,
@@ -38,12 +37,10 @@ db.prepare(`CREATE TABLE IF NOT EXISTS issues (
   status    TEXT    NOT NULL DEFAULT 'open'
 )`).run();
 
-db.prepare(`CREATE TABLE IF NOT EXISTS screenshots (
-  id        INTEGER PRIMARY KEY AUTOINCREMENT,
-  scan_id   INTEGER NOT NULL REFERENCES scans(id),
-  page_url  TEXT NOT NULL,
-  data_url  TEXT NOT NULL,
-  UNIQUE(scan_id, page_url)
+// Per-issue cropped screenshots
+db.prepare(`CREATE TABLE IF NOT EXISTS issue_screenshots (
+  issue_id  INTEGER PRIMARY KEY REFERENCES issues(id),
+  data_url  TEXT NOT NULL
 )`).run();
 
 function createScan(url, pageLimit) {
@@ -67,11 +64,11 @@ function updateScan(id, fields) {
 }
 
 function createIssue(scanId, issue) {
-  db.prepare(`
+  return db.prepare(`
     INSERT INTO issues (scan_id, sev, type, title, selector, page, wcag, desc)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
   `).run(scanId, issue.sev, issue.type, issue.title, issue.selector ?? null,
-         issue.page, issue.wcag ?? null, issue.desc);
+         issue.page, issue.wcag ?? null, issue.desc).lastInsertRowid;
 }
 
 function getIssue(id) {
@@ -86,18 +83,22 @@ function updateIssueStatus(id, status) {
   db.prepare('UPDATE issues SET status = ? WHERE id = ?').run(status, id);
 }
 
-function saveScreenshot(scanId, pageUrl, dataUrl) {
-  db.prepare('INSERT OR REPLACE INTO screenshots (scan_id, page_url, data_url) VALUES (?, ?, ?)')
-    .run(scanId, pageUrl, dataUrl);
+function saveIssueScreenshot(issueId, dataUrl) {
+  db.prepare('INSERT OR REPLACE INTO issue_screenshots (issue_id, data_url) VALUES (?, ?)')
+    .run(issueId, dataUrl);
 }
 
-function getScreenshot(scanId, pageUrl) {
-  return db.prepare('SELECT * FROM screenshots WHERE scan_id = ? AND page_url = ?')
-    .get(scanId, pageUrl);
+function getIssueScreenshot(issueId) {
+  return db.prepare('SELECT data_url FROM issue_screenshots WHERE issue_id = ?').get(issueId);
 }
 
 function markStaleScans() {
   db.prepare("UPDATE scans SET status = 'failed', error = 'Server was killed during scan' WHERE status = 'running'").run();
 }
 
-module.exports = { createScan, getScan, getScans, updateScan, createIssue, getIssue, getIssues, updateIssueStatus, saveScreenshot, getScreenshot, markStaleScans };
+module.exports = {
+  createScan, getScan, getScans, updateScan,
+  createIssue, getIssue, getIssues, updateIssueStatus,
+  saveIssueScreenshot, getIssueScreenshot,
+  markStaleScans,
+};
