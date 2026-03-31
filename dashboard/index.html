@@ -956,9 +956,9 @@
       <button class="modal-close" onclick="closeModal(true)">✕</button>
     </div>
 
-    <div class="modal-screenshot">
+    <div class="modal-screenshot" id="modal-screenshot-container">
       <span class="screenshot-label">SCREENSHOT</span>
-      <div class="screenshot-placeholder">
+      <div id="screenshot-placeholder" class="screenshot-placeholder">
         📸<br>Screenshot captured by extension<br>
         <span style="font-size:10px;color:var(--border2)">Click element in page to update</span>
       </div>
@@ -997,6 +997,7 @@ let ISSUES = [];
 let activeSearch = '';
 let activeSev    = 'all';
 let activeIssue  = null;
+let activeScanId = null;
 let pollInterval = null;
 
 // SCAN LAUNCHER
@@ -1056,6 +1057,7 @@ async function loadScan(scanId) {
     fetch(`/api/issues?scanId=${scanId}`).then(r => r.json()),
   ]);
   ISSUES = issues;
+  activeScanId = scanId;
   renderScore(scan);
   renderStatCards();
   renderIssues();
@@ -1133,7 +1135,7 @@ function filterSearch(val) { activeSearch = val.toLowerCase(); renderIssues(); }
 
 // MODAL
 
-function openModal(id) {
+async function openModal(id) {
   activeIssue = ISSUES.find(i => i.id === id);
   if (!activeIssue) return;
   document.getElementById('modal-title').textContent    = activeIssue.title;
@@ -1143,6 +1145,28 @@ function openModal(id) {
   if (wcagEl) { wcagEl.style.display = activeIssue.wcag ? '' : 'none'; if (activeIssue.wcag) wcagEl.textContent = activeIssue.wcag; }
   const btn = document.getElementById('modal-status-btn');
   if (btn) btn.textContent = activeIssue.status === 'open' ? 'Mark as Resolved' : 'Reopen Issue';
+
+  // Load screenshot
+  const container   = document.getElementById('modal-screenshot-container');
+  const placeholder = document.getElementById('screenshot-placeholder');
+  const existingImg = container.querySelector('img');
+  if (existingImg) existingImg.remove();
+  placeholder.style.display = '';
+
+  if (activeScanId) {
+    try {
+      const r = await fetch(`/api/screenshots?scanId=${activeScanId}&page=${encodeURIComponent(activeIssue.page)}`);
+      if (r.ok) {
+        const { dataUrl } = await r.json();
+        const img = document.createElement('img');
+        img.src = dataUrl;
+        img.style.cssText = 'width:100%;border-radius:4px;display:block;margin-top:6px;';
+        placeholder.style.display = 'none';
+        container.appendChild(img);
+      }
+    } catch { /* screenshot unavailable — show placeholder */ }
+  }
+
   document.querySelector('.modal-overlay').classList.add('open');
 }
 
