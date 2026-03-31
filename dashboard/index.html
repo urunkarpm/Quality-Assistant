@@ -706,12 +706,28 @@
     border: 1px solid var(--border);
     border-radius: 8px;
     overflow: hidden;
-    height: 160px;
+    height: 200px;
     display: flex;
     align-items: center;
     justify-content: center;
     position: relative;
+    cursor: zoom-in;
   }
+  .modal-screenshot img { object-fit: cover; object-position: top; width: 100%; height: 100%; display: block; }
+  .screenshot-open-hint {
+    position: absolute;
+    bottom: 8px; right: 8px;
+    background: rgba(26,24,20,0.7);
+    color: #fff;
+    font-size: 10px;
+    padding: 2px 7px;
+    border-radius: 3px;
+    font-family: var(--mono);
+    letter-spacing: 0.04em;
+    pointer-events: none;
+    display: none;
+  }
+  .modal-screenshot:hover .screenshot-open-hint { display: block; }
   .screenshot-placeholder {
     font-size: 12px;
     color: var(--text3);
@@ -1039,12 +1055,12 @@
       <button class="modal-close" onclick="closeModal(true)">✕</button>
     </div>
 
-    <div class="modal-screenshot" id="modal-screenshot-container">
+    <div class="modal-screenshot" id="modal-screenshot-container" onclick="openScreenshotFull()">
       <span class="screenshot-label">SCREENSHOT</span>
       <div id="screenshot-placeholder" class="screenshot-placeholder">
-        📸<br>Screenshot captured by extension<br>
-        <span style="font-size:10px;color:var(--border2)">Click element in page to update</span>
+        No screenshot available
       </div>
+      <span class="screenshot-open-hint">click to open full size</span>
     </div>
 
     <div class="modal-body">
@@ -1261,6 +1277,7 @@ async function openModal(id) {
   const existingImg = container.querySelector('img');
   if (existingImg) existingImg.remove();
   placeholder.style.display = '';
+  container.style.cursor = 'default';
 
   if (activeScanId) {
     try {
@@ -1269,14 +1286,30 @@ async function openModal(id) {
         const { dataUrl } = await r.json();
         const img = document.createElement('img');
         img.src = dataUrl;
-        img.style.cssText = 'width:100%;border-radius:4px;display:block;margin-top:6px;';
+        img.dataset.fullSrc = dataUrl;
         placeholder.style.display = 'none';
-        container.appendChild(img);
+        const hint = container.querySelector('.screenshot-open-hint');
+        if (hint) container.insertBefore(img, hint);
+        else container.appendChild(img);
+        container.style.cursor = 'zoom-in';
       }
-    } catch { /* screenshot unavailable — show placeholder */ }
+    } catch { /* screenshot unavailable */ }
   }
 
   document.querySelector('.modal-overlay').classList.add('open');
+}
+
+function openScreenshotFull() {
+  const img = document.querySelector('#modal-screenshot-container img');
+  if (!img) return;
+  const w = window.open('', '_blank');
+  if (!w) return;
+  w.document.title = 'Screenshot';
+  const newImg = w.document.createElement('img');
+  newImg.src = img.dataset.fullSrc;
+  newImg.style.cssText = 'max-width:100%;display:block';
+  w.document.body.style.cssText = 'margin:0;background:#000';
+  w.document.body.appendChild(newImg);
 }
 
 function closeModal(force) {

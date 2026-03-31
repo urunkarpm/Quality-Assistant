@@ -50,11 +50,52 @@ async function runScan(url, pageLimit, onIssue, onScreenshot, onProgress) {
           }
         }
         if (onScreenshot) {
-          if (onProgress) onProgress(`[${pageUrl}] Capturing screenshot…`);
+          if (onProgress) onProgress(`[${pageUrl}] Capturing annotated screenshot…`);
           try {
-            const buf = await page.screenshot({ type: 'jpeg', quality: 60 });
+            // Highlight all issue selectors found on this page
+            const selectors = allIssues
+              .filter(i => i.page === pageUrl && i.selector)
+              .map(i => i.selector);
+
+            await page.evaluate((sels) => {
+              window.__qaOverlays = [];
+              const SEV_COLORS = {};
+              sels.forEach(({ sel, sev }) => {
+                const color = sev === 'critical' ? '#ef4444'
+                            : sev === 'major'    ? '#f97316'
+                            :                      '#eab308';
+                try {
+                  document.querySelectorAll(sel).forEach(el => {
+                    const r = el.getBoundingClientRect();
+                    if (r.width === 0 && r.height === 0) return;
+                    const box = document.createElement('div');
+                    box.style.cssText = [
+                      'position:fixed',
+                      `left:${r.left}px`, `top:${r.top}px`,
+                      `width:${r.width}px`, `height:${r.height}px`,
+                      `outline:3px solid ${color}`,
+                      `background:${color}22`,
+                      'z-index:2147483647',
+                      'pointer-events:none',
+                      'box-sizing:border-box',
+                    ].join(';');
+                    document.documentElement.appendChild(box);
+                    window.__qaOverlays.push(box);
+                  });
+                } catch {}
+              });
+            }, selectors.map(sel => ({ sel, sev: (allIssues.find(i => i.selector === sel) || {}).sev || 'minor' })));
+
+            const buf = await page.screenshot({ type: 'jpeg', quality: 75 });
+
+            // Remove overlays
+            await page.evaluate(() => {
+              (window.__qaOverlays || []).forEach(el => el.remove());
+              window.__qaOverlays = [];
+            });
+
             onScreenshot(pageUrl, `data:image/jpeg;base64,${buf.toString('base64')}`);
-            if (onProgress) onProgress(`[${pageUrl}] Screenshot saved`);
+            if (onProgress) onProgress(`[${pageUrl}] Screenshot saved (${selectors.length} issue${selectors.length !== 1 ? 's' : ''} highlighted)`);
           } catch (err) {
             console.warn(`[runner] screenshot failed on ${pageUrl}: ${err.message}`);
           }
