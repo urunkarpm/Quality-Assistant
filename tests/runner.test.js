@@ -27,3 +27,10 @@ describe('computeScore', () => {
     expect(computeScore(issues)).toBe(74);
   });
 });
+
+describe('runScan onScreenshot callback', () => {
+  test('onScreenshot is optional — runScan signature accepts 4 params', () => {
+    const { runScan } = require('../server/scanner/runner');
+    expect(runScan.length).toBe(4);
+  });
+});

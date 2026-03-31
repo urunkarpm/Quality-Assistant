@@ -15,7 +15,7 @@ function computeScore(issues) {
   return Math.max(0, 100 - c * 10 - m * 4 - n);
 }
 
-async function runScan(url, pageLimit, onIssue) {
+async function runScan(url, pageLimit, onIssue, onScreenshot) {
   const browser   = await chromium.launch();
   const allIssues = [];
 
@@ -33,6 +33,14 @@ async function runScan(url, pageLimit, onIssue) {
             }
           } catch (err) {
             console.warn(`[runner] ${fn.name} failed on ${pageUrl}: ${err.message}`);
+          }
+        }
+        if (onScreenshot) {
+          try {
+            const buf = await page.screenshot({ type: 'jpeg', quality: 60 });
+            onScreenshot(pageUrl, `data:image/jpeg;base64,${buf.toString('base64')}`);
+          } catch (err) {
+            console.warn(`[runner] screenshot failed on ${pageUrl}: ${err.message}`);
           }
         }
       } finally {
