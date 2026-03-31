@@ -68,8 +68,8 @@ async function captureElementScreenshot(page, selector, sev) {
   }
 }
 
-async function runScan(url, pageLimit, onIssue, onIssueScreenshot, onProgress) {
-  const browser   = await chromium.launch();
+async function runScan(url, pageLimit, opts, onIssue, onIssueScreenshot, onProgress) {
+  const browser   = await chromium.launch({ headless: !opts?.headed });
   const allIssues = [];
 
   const checks = [

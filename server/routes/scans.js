@@ -15,7 +15,7 @@ router.get('/:id', (req, res) => {
 });
 
 router.post('/', (req, res) => {
-  const { url, pageLimit } = req.body;
+  const { url, pageLimit, headed = false } = req.body;
   if (!url) return res.status(400).json({ error: 'url is required' });
   try { new URL(url); } catch { return res.status(400).json({ error: 'url is not a valid URL' }); }
   if (!pageLimit || !Number.isInteger(pageLimit) || pageLimit < 1 || pageLimit > 50) {
@@ -31,6 +31,7 @@ router.post('/', (req, res) => {
   runScan(
     url,
     pageLimit,
+    { headed },
     issue => createIssue(scanId, issue),
     (issueId, dataUrl) => saveIssueScreenshot(issueId, dataUrl),
     msg => { const log = scanLogs.get(scanId); if (log) log.push(msg); }

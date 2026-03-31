@@ -899,6 +899,11 @@
         <span class="mi" style="font-size:15px">play_arrow</span> Run Scan
       </button>
     </div>
+    <label style="display:flex;align-items:center;gap:7px;margin-top:10px;cursor:pointer;font-size:12px;color:rgba(255,255,255,0.55);user-select:none;">
+      <input type="checkbox" id="scan-headed" style="accent-color:var(--accent);width:13px;height:13px;cursor:pointer;">
+      <span class="mi" style="font-size:15px;color:rgba(255,255,255,0.4)">monitor</span>
+      Headed mode
+    </label>
   </div>
 
   <nav class="sidebar-nav">
@@ -1116,6 +1121,7 @@ let pollInterval = null;
 async function startScan() {
   const url       = document.getElementById('scan-url').value.trim();
   const pageLimit = parseInt(document.getElementById('scan-pages').value, 10);
+  const headed    = document.getElementById('scan-headed').checked;
   if (!url) { alert('Enter a URL to scan.'); return; }
 
   const btn = document.getElementById('scan-btn');
@@ -1124,7 +1130,7 @@ async function startScan() {
   try {
     const res = await fetch('/api/scans', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ url, pageLimit }),
+      body: JSON.stringify({ url, pageLimit, headed }),
     });
     if (!res.ok) { const e = await res.json(); throw new Error(e.error); }
     const { scanId } = await res.json();
