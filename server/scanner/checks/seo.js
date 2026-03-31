@@ -1,6 +1,6 @@
 // server/scanner/checks/seo.js
 async function check(page, _responseHeaders, pageUrl = '') {
-  const path = pageUrl ? new URL(pageUrl).pathname : '/';
+  const path = pageUrl || '/';
 
   const data = await page.evaluate(() => ({
     title:       document.title,

@@ -1,6 +1,6 @@
 // server/scanner/checks/security.js
 async function check(_page, responseHeaders, pageUrl = '') {
-  const path = pageUrl ? new URL(pageUrl).pathname : '/';
+  const path = pageUrl || '/';
   const h = Object.fromEntries(
     Object.entries(responseHeaders).map(([k, v]) => [k.toLowerCase(), v])
   );

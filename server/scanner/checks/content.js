@@ -1,6 +1,6 @@
 // server/scanner/checks/content.js
 async function check(page, _responseHeaders, pageUrl = '') {
-  const path   = pageUrl ? new URL(pageUrl).pathname : '/';
+  const path = pageUrl || '/';
   const issues = [];
 
   const { links, images } = await page.evaluate(() => ({

@@ -10,9 +10,6 @@ const axeSource = fs.readFileSync(
 const SEV_MAP = { critical: 'critical', serious: 'critical', moderate: 'major', minor: 'minor' };
 
 async function check(page, _responseHeaders, pageUrl = '') {
-  let urlPath = '/';
-  try { urlPath = pageUrl ? new URL(pageUrl).pathname : '/'; } catch { urlPath = '/'; }
-
   const isInjected = await page.evaluate(() => typeof window.axe !== 'undefined');
   if (!isInjected) await page.evaluate(axeSource);
   const results = await page.evaluate(() => window.axe.run());
@@ -25,7 +22,7 @@ async function check(page, _responseHeaders, pageUrl = '') {
         type:     'ADA',
         title:    v.description,
         selector: node.target?.[0] ?? null,
-        page:     urlPath,
+        page:     pageUrl || '/',
         wcag:     `${v.id} (${v.tags.find(t => t.startsWith('wcag'))})`,
         desc:     `${v.help}. ${node.failureSummary || ''}`.trim(),
       }))

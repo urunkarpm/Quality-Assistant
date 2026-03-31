@@ -1,6 +1,6 @@
 // server/scanner/checks/perf.js
 async function check(page, _responseHeaders, pageUrl = '', _timing = null) {
-  const path = pageUrl ? new URL(pageUrl).pathname : '/';
+  const path = pageUrl || '/';
 
   let timing = _timing;
   if (!timing && page) {
