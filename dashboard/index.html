@@ -254,19 +254,6 @@
     overflow: hidden;
     position: relative;
   }
-  .score-hero::before {
-    content: 'WCAG 2.1 AA';
-    position: absolute;
-    right: -18px;
-    top: 20px;
-    font-family: var(--serif);
-    font-size: 80px;
-    font-style: italic;
-    color: var(--border);
-    pointer-events: none;
-    letter-spacing: -0.04em;
-    white-space: nowrap;
-  }
 
   .score-circle {
     position: relative;
@@ -306,56 +293,85 @@
   .scan-log {
     flex: 1;
     min-width: 0;
-    max-height: 160px;
     display: none;
     flex-direction: column;
-    gap: 0;
-    border-left: 1px solid var(--border);
-    padding-left: 24px;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid #2a2a2a;
+    background: #0d0d0d;
+    font-family: var(--mono);
   }
   .scan-log.active { display: flex; }
-  .scan-log-title {
-    font-size: 10px;
-    font-family: var(--mono);
-    color: var(--text3);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    margin-bottom: 8px;
+  .scan-log-titlebar {
     display: flex;
     align-items: center;
     gap: 6px;
+    padding: 7px 10px;
+    background: #1a1a1a;
+    border-bottom: 1px solid #2a2a2a;
+    flex-shrink: 0;
   }
-  .scan-log-title::before {
-    content: '';
+  .scan-log-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .scan-log-dot.red    { background: #ff5f57; }
+  .scan-log-dot.yellow { background: #febc2e; }
+  .scan-log-dot.green  { background: #28c840; }
+  .scan-log-titlebar-label {
+    font-size: 11px;
+    color: #555;
+    margin-left: 4px;
+    flex: 1;
+    text-align: center;
+  }
+  .scan-log-titlebar-pulse {
     width: 6px; height: 6px;
     border-radius: 50%;
-    background: var(--accent);
+    background: #28c840;
     animation: pulse 1s ease-in-out infinite;
     flex-shrink: 0;
   }
   @keyframes pulse {
     0%, 100% { opacity: 1; }
-    50%       { opacity: 0.3; }
+    50%       { opacity: 0.25; }
   }
   .scan-log-entries {
     flex: 1;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
-    gap: 3px;
-    scrollbar-width: none;
+    padding: 8px 12px;
+    gap: 2px;
+    max-height: 130px;
+    scrollbar-width: thin;
+    scrollbar-color: #2a2a2a transparent;
   }
-  .scan-log-entries::-webkit-scrollbar { display: none; }
+  .scan-log-entries::-webkit-scrollbar { width: 4px; }
+  .scan-log-entries::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 2px; }
   .scan-log-entry {
-    font-family: var(--mono);
     font-size: 11px;
-    color: var(--text2);
-    line-height: 1.4;
+    color: #555;
+    line-height: 1.5;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
-  .scan-log-entry.new { color: var(--text); }
+  .scan-log-entry::before { content: '> '; color: #333; }
+  .scan-log-entry.new { color: #a8e6a3; }
+  .scan-log-cursor {
+    display: inline-block;
+    width: 7px; height: 13px;
+    background: #28c840;
+    vertical-align: middle;
+    margin-left: 2px;
+    animation: blink 1s step-start infinite;
+  }
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0; }
+  }
   .score-meta h2 {
     font-family: var(--serif);
     font-size: 18px;
@@ -935,8 +951,16 @@
       </div>
 
       <div class="scan-log" id="scan-log">
-        <div class="scan-log-title">Scan in progress</div>
-        <div class="scan-log-entries" id="scan-log-entries"></div>
+        <div class="scan-log-titlebar">
+          <span class="scan-log-dot red"></span>
+          <span class="scan-log-dot yellow"></span>
+          <span class="scan-log-dot green"></span>
+          <span class="scan-log-titlebar-label">scan — runner</span>
+          <span class="scan-log-titlebar-pulse"></span>
+        </div>
+        <div class="scan-log-entries" id="scan-log-entries">
+          <span class="scan-log-cursor"></span>
+        </div>
       </div>
     </div>
 
@@ -1093,7 +1117,10 @@ function startPolling(scanId, pageLimit) {
   const logEl     = document.getElementById('scan-log-entries');
   statusEl.style.display = 'inline';
   logPanel.classList.add('active');
-  logEl.textContent = '';
+  while (logEl.firstChild) logEl.removeChild(logEl.firstChild);
+  const cursor = document.createElement('span');
+  cursor.className = 'scan-log-cursor';
+  logEl.appendChild(cursor);
   logSeenCount = 0;
 
   pollInterval = setInterval(async () => {
@@ -1102,16 +1129,16 @@ function startPolling(scanId, pageLimit) {
       [scan] = await Promise.all([
         fetch(`/api/scans/${scanId}`).then(r => r.json()),
         fetch(`/api/scans/${scanId}/progress`).then(r => r.json()).then(({ log }) => {
-          // Append only new entries
+          // Append only new entries before the blinking cursor
+          const cur = logEl.querySelector('.scan-log-cursor');
           for (let i = logSeenCount; i < log.length; i++) {
             const entry = document.createElement('div');
             entry.className = 'scan-log-entry new';
             entry.textContent = log[i];
-            logEl.appendChild(entry);
+            if (cur) logEl.insertBefore(entry, cur); else logEl.appendChild(entry);
             setTimeout(() => entry.classList.remove('new'), 800);
             logSeenCount++;
           }
-          // Auto-scroll to bottom
           logEl.scrollTop = logEl.scrollHeight;
         }).catch(() => {}),
       ]);
