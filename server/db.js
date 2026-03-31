@@ -96,4 +96,8 @@ function getScreenshot(scanId, pageUrl) {
     .get(scanId, pageUrl);
 }
 
-module.exports = { createScan, getScan, getScans, updateScan, createIssue, getIssue, getIssues, updateIssueStatus, saveScreenshot, getScreenshot };
+function markStaleScans() {
+  db.prepare("UPDATE scans SET status = 'failed', error = 'Server was killed during scan' WHERE status = 'running'").run();
+}
+
+module.exports = { createScan, getScan, getScans, updateScan, createIssue, getIssue, getIssues, updateIssueStatus, saveScreenshot, getScreenshot, markStaleScans };

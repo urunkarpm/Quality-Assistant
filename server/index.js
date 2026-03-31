@@ -18,6 +18,9 @@ app.get('*', (_req, res) => {
 
 // Only start listening when run directly, not when required by tests
 if (require.main === module) {
+  // Mark any scans that were left "running" (from a previous crashed session) as failed
+  require('./db').markStaleScans();
+
   app.listen(PORT, () => console.log(`Quality Assistant running on http://localhost:${PORT}`));
 }
 
