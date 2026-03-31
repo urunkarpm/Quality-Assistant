@@ -38,6 +38,13 @@ db.prepare(`CREATE TABLE IF NOT EXISTS issues (
   status    TEXT    NOT NULL DEFAULT 'open'
 )`).run();
 
+db.prepare(`CREATE TABLE IF NOT EXISTS screenshots (
+  id        INTEGER PRIMARY KEY AUTOINCREMENT,
+  scan_id   INTEGER NOT NULL REFERENCES scans(id),
+  page_url  TEXT NOT NULL,
+  data_url  TEXT NOT NULL
+)`).run();
+
 function createScan(url, pageLimit) {
   return db.prepare(
     'INSERT INTO scans (url, page_limit, started_at) VALUES (?, ?, ?)'
@@ -78,4 +85,14 @@ function updateIssueStatus(id, status) {
   db.prepare('UPDATE issues SET status = ? WHERE id = ?').run(status, id);
 }
 
-module.exports = { createScan, getScan, getScans, updateScan, createIssue, getIssue, getIssues, updateIssueStatus };
+function saveScreenshot(scanId, pageUrl, dataUrl) {
+  db.prepare('INSERT INTO screenshots (scan_id, page_url, data_url) VALUES (?, ?, ?)')
+    .run(scanId, pageUrl, dataUrl);
+}
+
+function getScreenshot(scanId, pageUrl) {
+  return db.prepare('SELECT * FROM screenshots WHERE scan_id = ? AND page_url = ?')
+    .get(scanId, pageUrl);
+}
+
+module.exports = { createScan, getScan, getScans, updateScan, createIssue, getIssue, getIssues, updateIssueStatus, saveScreenshot, getScreenshot };
