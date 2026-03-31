@@ -42,7 +42,8 @@ db.prepare(`CREATE TABLE IF NOT EXISTS screenshots (
   id        INTEGER PRIMARY KEY AUTOINCREMENT,
   scan_id   INTEGER NOT NULL REFERENCES scans(id),
   page_url  TEXT NOT NULL,
-  data_url  TEXT NOT NULL
+  data_url  TEXT NOT NULL,
+  UNIQUE(scan_id, page_url)
 )`).run();
 
 function createScan(url, pageLimit) {
@@ -86,7 +87,7 @@ function updateIssueStatus(id, status) {
 }
 
 function saveScreenshot(scanId, pageUrl, dataUrl) {
-  db.prepare('INSERT INTO screenshots (scan_id, page_url, data_url) VALUES (?, ?, ?)')
+  db.prepare('INSERT OR REPLACE INTO screenshots (scan_id, page_url, data_url) VALUES (?, ?, ?)')
     .run(scanId, pageUrl, dataUrl);
 }
 

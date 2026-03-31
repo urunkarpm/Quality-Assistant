@@ -52,9 +52,6 @@ describe('database', () => {
   });
 
   test('saveScreenshot and getScreenshot roundtrip', () => {
-    process.env.DB_PATH = ':memory:';
-    jest.resetModules();
-    const db = require('../server/db');
     const scanId = db.createScan('https://example.com', 1);
     db.saveScreenshot(scanId, 'https://example.com/', 'data:image/jpeg;base64,abc123');
     const shot = db.getScreenshot(scanId, 'https://example.com/');
