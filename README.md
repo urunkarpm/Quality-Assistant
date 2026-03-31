@@ -64,6 +64,14 @@ cd Quality-Assistant
 
 **2. Install dependencies**
 
+**Windows** — run this single command in PowerShell as Administrator (installs Python, C++ build tools, npm packages, and Playwright):
+
+```powershell
+powershell -ExecutionPolicy Bypass -File setup.ps1
+```
+
+**macOS / Linux:**
+
 ```bash
 npm install
 npx playwright install chromium
