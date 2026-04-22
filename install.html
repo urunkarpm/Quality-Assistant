@@ -8,15 +8,21 @@
   <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;600;700&family=Google+Sans+Display:wght@400;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #F7F5F0;
+      /* Primary Color Palette */
+      --cyan:      #03AED2;
+      --yellow:    #F8DE22;
+      --orange:    #F45B26;
+      --pink:      #D12052;
+      
+      --bg: #F7F9FA;
       --surface: #FFFFFF;
-      --text: #1A1814;
-      --text2: #6B6860;
-      --text3: #9E9C98;
-      --accent: #D4890A;
-      --accent-hover: #B5760A;
-      --border: #E0DDD6;
-      --shadow: 0 4px 20px rgba(0,0,0,0.08);
+      --text: #1A1F24;
+      --text2: #5A6B7A;
+      --text3: #8A9BA8;
+      --accent: var(--cyan);
+      --accent-hover: #0295B5;
+      --border: #E0E8ED;
+      --shadow: 0 4px 20px rgba(3,174,210,0.12);
       --radius: 8px;
     }
 
@@ -43,7 +49,7 @@
     .logo {
       width: 80px;
       height: 80px;
-      background: var(--accent);
+      background: linear-gradient(135deg, var(--cyan), var(--pink));
       border-radius: 12px;
       display: flex;
       align-items: center;
@@ -104,7 +110,7 @@
 
     .os-btn:hover {
       border-color: var(--accent);
-      background: #FFFDF5;
+      background: #E8F6FA;
     }
 
     .os-btn.active {
@@ -122,7 +128,7 @@
       align-items: center;
       gap: 12px;
       padding: 16px 40px;
-      background: var(--accent);
+      background: linear-gradient(135deg, var(--cyan), #0295B5);
       color: #fff;
       border: none;
       border-radius: var(--radius);
@@ -131,14 +137,14 @@
       font-weight: 600;
       cursor: pointer;
       transition: all 0.2s;
-      box-shadow: 0 4px 12px rgba(212, 137, 10, 0.3);
+      box-shadow: 0 4px 12px rgba(3, 174, 210, 0.3);
       text-decoration: none;
     }
 
     .install-btn:hover {
-      background: var(--accent-hover);
+      background: linear-gradient(135deg, #0295B5, var(--cyan));
       transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(212, 137, 10, 0.4);
+      box-shadow: 0 6px 20px rgba(3, 174, 210, 0.4);
     }
 
     .install-btn:active {
@@ -161,11 +167,13 @@
       padding: 16px;
       background: var(--bg);
       border-radius: var(--radius);
+      border-left: 3px solid var(--cyan);
     }
 
     .feature-icon {
       font-size: 24px;
       margin-bottom: 8px;
+      color: var(--cyan);
     }
 
     .feature-title {
@@ -183,8 +191,8 @@
     .requirements {
       margin-top: 24px;
       padding: 20px;
-      background: #FFFDF5;
-      border: 1px solid #FDF3E0;
+      background: #E8F6FA;
+      border: 1px solid #C5E8ED;
       border-radius: var(--radius);
       text-align: left;
     }
@@ -193,7 +201,7 @@
       font-size: 14px;
       font-weight: 600;
       margin-bottom: 12px;
-      color: var(--accent);
+      color: var(--cyan);
     }
 
     .requirements ul {
@@ -212,7 +220,7 @@
       content: '[OK]';
       position: absolute;
       left: 0;
-      color: var(--accent);
+      color: var(--cyan);
       font-weight: 600;
     }
 
@@ -237,7 +245,7 @@
       display: inline-block;
       width: 24px;
       height: 24px;
-      background: var(--accent);
+      background: var(--cyan);
       color: #fff;
       border-radius: 50%;
       text-align: center;
@@ -289,7 +297,7 @@
     }
 
     footer a {
-      color: var(--accent);
+      color: var(--cyan);
       text-decoration: none;
     }
 
