@@ -23,111 +23,161 @@
       --accent-hover: #0295B5;
       --border: #E0E8ED;
       --shadow: 0 4px 20px rgba(3,174,210,0.12);
-      --radius: 8px;
+      --radius: 12px;
+      --radius-lg: 20px;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
       font-family: 'Google Sans', system-ui, sans-serif;
-      background: var(--bg);
+      background: linear-gradient(135deg, #F7F9FA 0%, #E8F4F8 50%, #F0F7FA 100%);
       color: var(--text);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      padding: 20px;
+      padding: 40px 20px;
     }
 
     .container {
-      max-width: 600px;
+      max-width: 720px;
       width: 100%;
+    }
+
+    /* Header Section */
+    .header {
       text-align: center;
+      margin-bottom: 48px;
+      animation: fadeInDown 0.6s ease-out;
+    }
+
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     .logo {
-      width: 80px;
-      height: 80px;
+      width: 96px;
+      height: 96px;
       background: linear-gradient(135deg, var(--cyan), var(--pink));
-      border-radius: 12px;
+      border-radius: 24px;
       display: flex;
       align-items: center;
       justify-content: center;
       font-family: 'Google Sans Display', sans-serif;
       font-weight: 700;
-      font-size: 36px;
+      font-size: 48px;
       color: #fff;
       margin: 0 auto 24px;
-      box-shadow: var(--shadow);
+      box-shadow: 0 12px 40px rgba(3, 174, 210, 0.3);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .logo:hover {
+      transform: scale(1.05) rotate(2deg);
+      box-shadow: 0 16px 50px rgba(3, 174, 210, 0.4);
     }
 
     h1 {
       font-family: 'Google Sans Display', sans-serif;
-      font-size: 32px;
+      font-size: 40px;
       font-weight: 700;
-      margin-bottom: 12px;
-      letter-spacing: -0.02em;
+      margin-bottom: 16px;
+      letter-spacing: -0.03em;
+      background: linear-gradient(135deg, var(--cyan), var(--pink));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
 
     .subtitle {
-      font-size: 16px;
+      font-size: 18px;
       color: var(--text2);
-      line-height: 1.6;
-      margin-bottom: 32px;
+      line-height: 1.7;
+      max-width: 580px;
+      margin: 0 auto;
     }
 
+    /* Main Card */
     .card {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 32px;
-      box-shadow: var(--shadow);
-      margin-bottom: 24px;
+      border-radius: var(--radius-lg);
+      padding: 40px;
+      box-shadow: 0 8px 40px rgba(0, 0, 0, 0.08);
+      margin-bottom: 32px;
+      animation: fadeInUp 0.6s ease-out 0.1s backwards;
     }
 
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* OS Selector */
     .os-selector {
       display: flex;
-      gap: 12px;
+      gap: 16px;
       justify-content: center;
-      margin-bottom: 24px;
+      margin-bottom: 32px;
     }
 
     .os-btn {
-      padding: 12px 24px;
+      padding: 16px 28px;
       border: 2px solid var(--border);
       border-radius: var(--radius);
       background: var(--surface);
       font-family: 'Google Sans', sans-serif;
-      font-size: 14px;
+      font-size: 15px;
       font-weight: 500;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .os-btn::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(135deg, rgba(3, 174, 210, 0.05), rgba(209, 32, 82, 0.05));
+      opacity: 0;
+      transition: opacity 0.25s;
+    }
+
+    .os-btn:hover::before {
+      opacity: 1;
     }
 
     .os-btn:hover {
       border-color: var(--accent);
       background: #E8F6FA;
+      transform: translateY(-2px);
     }
 
     .os-btn.active {
       border-color: var(--accent);
-      background: var(--accent);
+      background: linear-gradient(135deg, var(--cyan), #0295B5);
       color: #fff;
+      box-shadow: 0 6px 20px rgba(3, 174, 210, 0.3);
     }
 
     .os-icon {
-      font-size: 20px;
+      font-size: 22px;
+      font-weight: 700;
     }
 
+    /* Install Button */
     .install-btn {
       display: inline-flex;
       align-items: center;
-      gap: 12px;
-      padding: 16px 40px;
+      justify-content: center;
+      gap: 14px;
+      padding: 20px 48px;
       background: linear-gradient(135deg, var(--cyan), #0295B5);
       color: #fff;
       border: none;
@@ -136,83 +186,196 @@
       font-size: 18px;
       font-weight: 600;
       cursor: pointer;
-      transition: all 0.2s;
-      box-shadow: 0 4px 12px rgba(3, 174, 210, 0.3);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 8px 24px rgba(3, 174, 210, 0.35);
       text-decoration: none;
+      width: 100%;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .install-btn::before {
+      content: '';
+      position: absolute;
+      top: 50%; left: 50%;
+      width: 0; height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+
+    .install-btn:hover::before {
+      width: 400px;
+      height: 400px;
     }
 
     .install-btn:hover {
-      background: linear-gradient(135deg, #0295B5, var(--cyan));
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(3, 174, 210, 0.4);
+      transform: translateY(-3px);
+      box-shadow: 0 12px 32px rgba(3, 174, 210, 0.45);
     }
 
     .install-btn:active {
-      transform: translateY(0);
+      transform: translateY(-1px);
     }
 
     .btn-icon {
-      font-size: 24px;
+      font-size: 26px;
+      transition: transform 0.3s;
     }
 
-    .features {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 16px;
+    .install-btn:hover .btn-icon {
+      transform: translateY(3px);
+    }
+
+    /* Manual Steps */
+    .manual-steps {
+      display: none;
       margin-top: 32px;
       text-align: left;
     }
 
-    .feature {
-      padding: 16px;
-      background: var(--bg);
-      border-radius: var(--radius);
-      border-left: 3px solid var(--cyan);
+    .manual-steps.active {
+      display: block;
+      animation: slideIn 0.4s ease-out;
     }
 
-    .feature-icon {
-      font-size: 24px;
-      margin-bottom: 8px;
-      color: var(--cyan);
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
-    .feature-title {
-      font-size: 14px;
-      font-weight: 600;
-      margin-bottom: 4px;
-    }
-
-    .feature-desc {
-      font-size: 12px;
-      color: var(--text3);
-      line-height: 1.4;
-    }
-
-    .requirements {
-      margin-top: 24px;
+    .step {
       padding: 20px;
-      background: #E8F6FA;
+      background: linear-gradient(135deg, #F8FAFB 0%, #F0F4F7 100%);
+      border-radius: var(--radius);
+      margin-bottom: 16px;
+      border-left: 4px solid var(--cyan);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .step:hover {
+      transform: translateX(4px);
+      box-shadow: 0 4px 16px rgba(3, 174, 210, 0.1);
+    }
+
+    .step-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .step-num {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, var(--cyan), #0295B5);
+      color: #fff;
+      border-radius: 50%;
+      font-size: 14px;
+      font-weight: 700;
+      flex-shrink: 0;
+      box-shadow: 0 4px 12px rgba(3, 174, 210, 0.3);
+    }
+
+    .step-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .code-wrapper {
+      position: relative;
+      background: #1a1a2e;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    code {
+      display: block;
+      background: transparent;
+      color: #a8e6a3;
+      padding: 16px 20px;
+      padding-right: 80px;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      line-height: 1.6;
+      overflow-x: auto;
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-size: 12px;
+      cursor: pointer;
+      color: #fff;
+      transition: all 0.2s;
+      backdrop-filter: blur(4px);
+    }
+
+    .copy-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    .copy-btn.copied {
+      background: #28c840;
+      border-color: #28c840;
+    }
+
+    /* Requirements */
+    .requirements {
+      margin-top: 32px;
+      padding: 24px;
+      background: linear-gradient(135deg, #E8F6FA 0%, #F0F8FA 100%);
       border: 1px solid #C5E8ED;
       border-radius: var(--radius);
       text-align: left;
     }
 
     .requirements h3 {
-      font-size: 14px;
+      font-size: 15px;
       font-weight: 600;
-      margin-bottom: 12px;
+      margin-bottom: 16px;
       color: var(--cyan);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .requirements h3::before {
+      content: '✓';
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 20px;
+      background: var(--cyan);
+      color: #fff;
+      border-radius: 50%;
+      font-size: 12px;
     }
 
     .requirements ul {
       list-style: none;
-      font-size: 13px;
+      font-size: 14px;
       color: var(--text2);
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
     }
 
     .requirements li {
-      padding: 4px 0;
-      padding-left: 20px;
+      padding: 8px 0;
+      padding-left: 28px;
       position: relative;
     }
 
@@ -222,110 +385,169 @@
       left: 0;
       color: var(--cyan);
       font-weight: 600;
+      font-size: 12px;
     }
 
-    .manual-steps {
-      display: none;
-      margin-top: 24px;
+    /* Features Grid */
+    .features {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      margin-top: 40px;
       text-align: left;
     }
 
-    .manual-steps.active {
-      display: block;
+    .feature {
+      padding: 24px;
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      animation: fadeInUp 0.6s ease-out backwards;
     }
 
-    .step {
-      padding: 16px;
-      background: var(--bg);
-      border-radius: var(--radius);
-      margin-bottom: 12px;
+    .feature:nth-child(1) { animation-delay: 0.2s; }
+    .feature:nth-child(2) { animation-delay: 0.3s; }
+    .feature:nth-child(3) { animation-delay: 0.4s; }
+
+    .feature:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 12px 32px rgba(3, 174, 210, 0.15);
+      border-color: var(--accent);
     }
 
-    .step-num {
-      display: inline-block;
-      width: 24px;
-      height: 24px;
-      background: var(--cyan);
-      color: #fff;
-      border-radius: 50%;
-      text-align: center;
-      line-height: 24px;
-      font-size: 12px;
-      font-weight: 600;
-      margin-right: 8px;
+    .feature-icon {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, rgba(3, 174, 210, 0.1), rgba(3, 174, 210, 0.05));
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--cyan);
+      margin-bottom: 16px;
     }
 
-    .step-title {
-      font-size: 14px;
+    .feature-title {
+      font-size: 16px;
       font-weight: 600;
       margin-bottom: 8px;
-    }
-
-    code {
-      display: block;
-      background: #1a1a1a;
-      color: #a8e6a3;
-      padding: 12px 16px;
-      border-radius: 6px;
-      font-family: 'Courier New', monospace;
-      font-size: 12px;
-      margin-top: 8px;
-      overflow-x: auto;
-    }
-
-    .copy-btn {
-      float: right;
-      background: transparent;
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      padding: 4px 8px;
-      font-size: 11px;
-      cursor: pointer;
-      color: var(--text3);
-      transition: all 0.2s;
-    }
-
-    .copy-btn:hover {
-      background: var(--surface2);
       color: var(--text);
     }
 
+    .feature-desc {
+      font-size: 13px;
+      color: var(--text3);
+      line-height: 1.6;
+    }
+
+    /* Footer */
     footer {
-      margin-top: 40px;
-      font-size: 12px;
+      margin-top: 48px;
+      text-align: center;
+      font-size: 13px;
       color: var(--text3);
     }
 
     footer a {
       color: var(--cyan);
       text-decoration: none;
+      font-weight: 500;
+      transition: color 0.2s;
     }
 
     footer a:hover {
+      color: var(--accent-hover);
       text-decoration: underline;
     }
 
-    @media (max-width: 600px) {
-      .features {
-        grid-template-columns: 1fr;
+    footer p {
+      margin: 8px 0;
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 32px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: #1a1a2e;
+      color: #fff;
+      padding: 14px 28px;
+      border-radius: 50px;
+      font-size: 14px;
+      font-weight: 500;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      opacity: 0;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .toast-icon {
+      color: #28c840;
+      font-size: 18px;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      body {
+        padding: 24px 16px;
+      }
+
+      .card {
+        padding: 28px 20px;
       }
 
       .os-selector {
         flex-direction: column;
       }
 
+      .os-btn {
+        justify-content: center;
+      }
+
       h1 {
-        font-size: 24px;
+        font-size: 28px;
+      }
+
+      .subtitle {
+        font-size: 16px;
+      }
+
+      .features {
+        grid-template-columns: 1fr;
+      }
+
+      .requirements ul {
+        grid-template-columns: 1fr;
+      }
+
+      .logo {
+        width: 80px;
+        height: 80px;
+        font-size: 40px;
       }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <div class="logo">Q</div>
-    
-    <h1>Install Quality Assistant</h1>
-    <p class="subtitle">A local website quality auditing tool that checks accessibility, visual, content, SEO, performance, and security issues — all in one click.</p>
+    <div class="header">
+      <div class="logo">Q</div>
+      <h1>Install Quality Assistant</h1>
+      <p class="subtitle">A powerful local website quality auditing tool that checks accessibility, visual design, content, SEO, performance, and security — all in one click.</p>
+    </div>
 
     <div class="card">
       <div class="os-selector">
@@ -345,50 +567,90 @@
 
       <button id="downloadLink" class="install-btn" onclick="installNow()">
         <span class="btn-icon">↓</span>
-        <span>Install Now</span>
+        <span>Download Setup Script</span>
       </button>
 
       <div class="manual-steps active" id="windowsSteps">
         <div class="step">
-          <div class="step-title"><span class="step-num">1</span>Download the setup script</div>
-          <code><button class="copy-btn" onclick="copyCode(this)">Copy</button>powershell -ExecutionPolicy Bypass -File setup.ps1</code>
+          <div class="step-header">
+            <span class="step-num">1</span>
+            <span class="step-title">Download & Run the Setup Script</span>
+          </div>
+          <div class="code-wrapper">
+            <code>powershell -ExecutionPolicy Bypass -File setup.ps1</code>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
         </div>
         <div class="step">
-          <div class="step-title"><span class="step-num">2</span>Start the server</div>
-          <code><button class="copy-btn" onclick="copyCode(this)">Copy</button>npm start</code>
+          <div class="step-header">
+            <span class="step-num">2</span>
+            <span class="step-title">Start the Server</span>
+          </div>
+          <div class="code-wrapper">
+            <code>npm start</code>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
         </div>
         <div class="step">
-          <div class="step-title"><span class="step-num">3</span>Open your browser</div>
-          <code>http://localhost:3000</code>
+          <div class="step-header">
+            <span class="step-num">3</span>
+            <span class="step-title">Open Your Browser</span>
+          </div>
+          <div class="code-wrapper">
+            <code>http://localhost:3000</code>
+          </div>
         </div>
       </div>
 
       <div class="manual-steps" id="unixSteps">
         <div class="step">
-          <div class="step-title"><span class="step-num">1</span>Clone the repository</div>
-          <code><button class="copy-btn" onclick="copyCode(this)">Copy</button>git clone https://github.com/urunkarpm/Quality-Assistant.git<br>cd Quality-Assistant</code>
+          <div class="step-header">
+            <span class="step-num">1</span>
+            <span class="step-title">Clone the Repository</span>
+          </div>
+          <div class="code-wrapper">
+            <code>git clone https://github.com/urunkarpm/Quality-Assistant.git<br>cd Quality-Assistant</code>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
         </div>
         <div class="step">
-          <div class="step-title"><span class="step-num">2</span>Install dependencies</div>
-          <code><button class="copy-btn" onclick="copyCode(this)">Copy</button>npm install<br>npx playwright install chromium</code>
+          <div class="step-header">
+            <span class="step-num">2</span>
+            <span class="step-title">Install Dependencies</span>
+          </div>
+          <div class="code-wrapper">
+            <code>npm install<br>npx playwright install chromium</code>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
         </div>
         <div class="step">
-          <div class="step-title"><span class="step-num">3</span>Start the server</div>
-          <code><button class="copy-btn" onclick="copyCode(this)">Copy</button>npm start</code>
+          <div class="step-header">
+            <span class="step-num">3</span>
+            <span class="step-title">Start the Server</span>
+          </div>
+          <div class="code-wrapper">
+            <code>npm start</code>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
         </div>
         <div class="step">
-          <div class="step-title"><span class="step-num">4</span>Open your browser</div>
-          <code>http://localhost:3000</code>
+          <div class="step-header">
+            <span class="step-num">4</span>
+            <span class="step-title">Open Your Browser</span>
+          </div>
+          <div class="code-wrapper">
+            <code>http://localhost:3000</code>
+          </div>
         </div>
       </div>
 
       <div class="requirements">
-        <h3>Settings Requirements</h3>
+        <h3>System Requirements</h3>
         <ul>
           <li>Node.js v18 or newer</li>
           <li>npm v9 or newer</li>
-          <li>Windows: PowerShell (Administrator)</li>
-          <li>macOS/Linux: Git (optional, for cloning)</li>
+          <li>PowerShell (Windows Administrator)</li>
+          <li>Git (macOS/Linux, optional)</li>
         </ul>
       </div>
     </div>
@@ -397,24 +659,30 @@
       <div class="feature">
         <div class="feature-icon">A11y</div>
         <div class="feature-title">Accessibility</div>
-        <div class="feature-desc">WCAG compliance checks with axe-core integration</div>
+        <div class="feature-desc">WCAG compliance checks powered by axe-core integration for inclusive web experiences.</div>
       </div>
       <div class="feature">
         <div class="feature-icon">Vis</div>
-        <div class="feature-title">Visual</div>
-        <div class="feature-desc">Contrast ratios, font sizes, and image analysis</div>
+        <div class="feature-title">Visual Design</div>
+        <div class="feature-desc">Analyze contrast ratios, font sizes, and image optimization for better UX.</div>
       </div>
       <div class="feature">
         <div class="feature-icon">Sec</div>
         <div class="feature-title">Security</div>
-        <div class="feature-desc">HTTP headers and security best practices</div>
+        <div class="feature-desc">Comprehensive HTTP headers and security best practices validation.</div>
       </div>
     </div>
 
     <footer>
-      <p>Quality Assistant is open source. <a href="https://github.com/urunkarpm/Quality-Assistant" target="_blank">View on GitHub</a></p>
-      <p style="margin-top: 8px;">Already installed? <a href="/" style="color: var(--accent);">Launch Dashboard →</a></p>
+      <p>Quality Assistant is open source. <a href="https://github.com/urunkarpm/Quality-Assistant" target="_blank">View on GitHub →</a></p>
+      <p>Already installed? <a href="/" style="color: var(--accent); font-weight: 600;">Launch Dashboard →</a></p>
     </footer>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast" id="toast">
+    <span class="toast-icon">✓</span>
+    <span class="toast-message">Copied to clipboard!</span>
   </div>
 
   <script>
@@ -454,7 +722,7 @@
         unixSteps.classList.remove('active');
         
         // Set button text for Windows
-        installBtn.querySelector('span:last-child').textContent = 'Install Now';
+        installBtn.querySelector('span:last-child').textContent = 'Download Setup Script';
       } else {
         windowsSteps.classList.remove('active');
         unixSteps.classList.add('active');
@@ -465,18 +733,29 @@
     }
 
     function copyCode(btn) {
-      const code = btn.parentElement.textContent.replace('Copy', '').trim();
+      const codeElement = btn.parentElement.querySelector('code');
+      const code = codeElement.textContent.replace('Copy', '').trim();
       navigator.clipboard.writeText(code).then(() => {
         const originalText = btn.textContent;
         btn.textContent = 'Copied!';
-        btn.style.background = '#28c840';
-        btn.style.color = '#fff';
+        btn.classList.add('copied');
+        
+        // Show toast notification
+        showToast();
+        
         setTimeout(() => {
           btn.textContent = originalText;
-          btn.style.background = '';
-          btn.style.color = '';
+          btn.classList.remove('copied');
         }, 2000);
       });
+    }
+
+    function showToast() {
+      const toast = document.getElementById('toast');
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2500);
     }
 
     async function installNow() {
@@ -499,14 +778,22 @@
           document.body.removeChild(a);
           URL.revokeObjectURL(url);
           
+          // Show success message
+          showToast();
+          
           // Show instructions to run it
-          alert('[OK] Setup script downloaded!\n\nNow open PowerShell as Administrator and run:\n\npowershell -ExecutionPolicy Bypass -File setup.ps1\n\nThe script will automatically install all requirements.');
+          setTimeout(() => {
+            alert('✓ Setup script downloaded!\n\nNow open PowerShell as Administrator and run:\n\npowershell -ExecutionPolicy Bypass -File setup.ps1\n\nThe script will automatically install all requirements.');
+          }, 500);
         } catch (error) {
-          alert('[ERROR] Error downloading script: ' + error.message);
+          alert('✗ Error downloading script: ' + error.message);
         }
       } else {
         // For macOS/Linux, show terminal commands
-        alert('[INFO] For ' + (os === 'mac' ? 'macOS' : 'Linux') + ', please open Terminal and run the commands shown below.');
+        showToast();
+        setTimeout(() => {
+          alert('ℹ For ' + (os === 'mac' ? 'macOS' : 'Linux') + ', please open Terminal and run the commands shown above.');
+        }, 500);
         selectOS(os);
       }
     }
