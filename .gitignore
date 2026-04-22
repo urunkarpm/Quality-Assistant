@@ -1,4 +1,7 @@
 ```
+# Database files
+*.db
+
 # Dependencies
 node_modules/
 
@@ -9,43 +12,9 @@ node_modules/
 # Environment
 .env
 .env.local
-*.env.*
+.env.*
 
 # Editors
 .vscode/
 .idea/
-
-# Python
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-
-# Build artifacts
-dist/
-build/
-*.o
-*.obj
-*.so
-*.a
-*.dll
-*.exe
-
-# Coverage
-coverage/
-htmlcov/
-.coverage
-
-# Testing
-.mypy_cache/
-.pytest_cache/
-
-# Docker
-.dockerignore
-Dockerfile
-docker-compose.yml
-
-# System
-.DS_Store
-Thumbs.db
 ```
