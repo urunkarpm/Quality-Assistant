@@ -347,7 +347,7 @@ The modal currently has (around line 959):
 <div class="modal-screenshot">
   <span class="screenshot-label">SCREENSHOT</span>
   <div class="screenshot-placeholder">
-    📸<br>Screenshot captured by extension<br>
+    [IMG]<br>Screenshot captured by extension<br>
     <span style="font-size:10px;color:var(--border2)">Click element in page to update</span>
   </div>
 </div>
@@ -359,7 +359,7 @@ Add `id="modal-screenshot-container"` to the outer div and `id="screenshot-place
 <div class="modal-screenshot" id="modal-screenshot-container">
   <span class="screenshot-label">SCREENSHOT</span>
   <div id="screenshot-placeholder" class="screenshot-placeholder">
-    📸<br>Screenshot captured by extension<br>
+    [IMG] Screenshot captured by extension<br>
     <span style="font-size:10px;color:var(--border2)">Click element in page to update</span>
   </div>
 </div>

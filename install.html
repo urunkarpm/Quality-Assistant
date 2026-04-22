@@ -209,7 +209,7 @@
     }
 
     .requirements li::before {
-      content: '✓';
+      content: '[OK]';
       position: absolute;
       left: 0;
       color: var(--accent);
@@ -322,21 +322,21 @@
     <div class="card">
       <div class="os-selector">
         <button class="os-btn active" data-os="windows" onclick="selectOS('windows')">
-          <span class="os-icon">🪟</span>
+          <span class="os-icon">Win</span>
           Windows
         </button>
         <button class="os-btn" data-os="mac" onclick="selectOS('mac')">
-          <span class="os-icon">🍎</span>
+          <span class="os-icon">Mac</span>
           macOS
         </button>
         <button class="os-btn" data-os="linux" onclick="selectOS('linux')">
-          <span class="os-icon">🐧</span>
+          <span class="os-icon">Lin</span>
           Linux
         </button>
       </div>
 
       <button id="downloadLink" class="install-btn" onclick="installNow()">
-        <span class="btn-icon">⬇</span>
+        <span class="btn-icon">↓</span>
         <span>Install Now</span>
       </button>
 
@@ -375,7 +375,7 @@
       </div>
 
       <div class="requirements">
-        <h3>⚙️ Requirements</h3>
+        <h3>Settings Requirements</h3>
         <ul>
           <li>Node.js v18 or newer</li>
           <li>npm v9 or newer</li>
@@ -387,17 +387,17 @@
 
     <div class="features">
       <div class="feature">
-        <div class="feature-icon">♿</div>
+        <div class="feature-icon">A11y</div>
         <div class="feature-title">Accessibility</div>
         <div class="feature-desc">WCAG compliance checks with axe-core integration</div>
       </div>
       <div class="feature">
-        <div class="feature-icon">🎨</div>
+        <div class="feature-icon">Vis</div>
         <div class="feature-title">Visual</div>
         <div class="feature-desc">Contrast ratios, font sizes, and image analysis</div>
       </div>
       <div class="feature">
-        <div class="feature-icon">🔒</div>
+        <div class="feature-icon">Sec</div>
         <div class="feature-title">Security</div>
         <div class="feature-desc">HTTP headers and security best practices</div>
       </div>
@@ -492,13 +492,13 @@
           URL.revokeObjectURL(url);
           
           // Show instructions to run it
-          alert('✅ Setup script downloaded!\n\nNow open PowerShell as Administrator and run:\n\npowershell -ExecutionPolicy Bypass -File setup.ps1\n\nThe script will automatically install all requirements.');
+          alert('[OK] Setup script downloaded!\n\nNow open PowerShell as Administrator and run:\n\npowershell -ExecutionPolicy Bypass -File setup.ps1\n\nThe script will automatically install all requirements.');
         } catch (error) {
-          alert('❌ Error downloading script: ' + error.message);
+          alert('[ERROR] Error downloading script: ' + error.message);
         }
       } else {
         // For macOS/Linux, show terminal commands
-        alert('📋 For ' + (os === 'mac' ? 'macOS' : 'Linux') + ', please open Terminal and run the commands shown below.');
+        alert('[INFO] For ' + (os === 'mac' ? 'macOS' : 'Linux') + ', please open Terminal and run the commands shown below.');
         selectOS(os);
       }
     }
