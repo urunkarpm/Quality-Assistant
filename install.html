@@ -1098,10 +1098,17 @@
         updateLogEntry(entry, 'processing');
         progressText.textContent = `Installing ${step.name}...`;
         
-        // Simulate installation delay
-        await sleep(step.duration || 1000);
+        // Execute real installation step
+        try {
+          await executeInstallationStep(step);
+          updateLogEntry(entry, 'success');
+        } catch (error) {
+          updateLogEntry(entry, 'error');
+          addLogEntry(`Error: ${error.message}`, 'error');
+          progressText.textContent = 'Installation failed!';
+          return;
+        }
         
-        updateLogEntry(entry, 'success');
         completedSteps++;
         const progress = Math.round((completedSteps / totalSteps) * 100);
         progressFill.style.width = `${progress}%`;
@@ -1115,43 +1122,80 @@
       }, 500);
     }
 
-    function getInstallationSteps(os) {
-      const commonSteps = [
-        { text: 'Checking system requirements...', name: 'System Check', duration: 800 },
-        { text: 'Downloading Quality Assistant...', name: 'Download', duration: 1500 },
-        { text: 'Extracting files...', name: 'Extraction', duration: 800 }
-      ];
+    async function executeInstallationStep(step) {
+      const os = document.querySelector('.os-btn.active').dataset.os;
       
+      // For actual file download and execution
+      if (step.action === 'download') {
+        return downloadAndExecuteScript(step.url, os);
+      }
+      
+      // Simulate time for local operations
+      await sleep(step.duration || 1000);
+    }
+
+    async function downloadAndExecuteScript(url, os) {
+      const scriptUrl = window.location.origin + url;
+      
+      try {
+        const response = await fetch(scriptUrl);
+        if (!response.ok) {
+          throw new Error(`Failed to download setup script (${response.status})`);
+        }
+        
+        const blob = await response.blob();
+        const scriptContent = await blob.text();
+        
+        // Create a temporary file with the script content
+        // For security reasons, browsers can't directly execute downloaded scripts
+        // Instead, we'll provide instructions to the user
+        
+        if (os === 'windows') {
+          // For Windows, create a downloadable .ps1 file
+          const downloadLink = document.createElement('a');
+          downloadLink.href = URL.createObjectURL(blob);
+          downloadLink.download = 'setup.ps1';
+          document.body.appendChild(downloadLink);
+          downloadLink.click();
+          document.body.removeChild(downloadLink);
+          
+          addLogEntry('Setup script downloaded! Run it with PowerShell:', 'success');
+          addLogEntry('powershell -ExecutionPolicy Bypass -File setup.ps1', 'processing');
+        } else {
+          // For Mac/Linux, create a downloadable .sh file
+          const downloadLink = document.createElement('a');
+          downloadLink.href = URL.createObjectURL(blob);
+          downloadLink.download = 'setup.sh';
+          document.body.appendChild(downloadLink);
+          downloadLink.click();
+          document.body.removeChild(downloadLink);
+          
+          addLogEntry('Setup script downloaded! Run it with:', 'success');
+          addLogEntry('chmod +x setup.sh && ./setup.sh', 'processing');
+        }
+        
+        return true;
+      } catch (error) {
+        throw error;
+      }
+    }
+
+    function getInstallationSteps(os) {
+      // For all OS types, download the setup script and let it handle the installation
       if (os === 'windows') {
         return [
-          ...commonSteps,
-          { text: 'Installing Node.js (if not present)...', name: 'Node.js', duration: 2000 },
-          { text: 'Installing Git (if not present)...', name: 'Git', duration: 1500 },
-          { text: 'Running npm install...', name: 'Dependencies', duration: 3000 },
-          { text: 'Installing Playwright browsers...', name: 'Playwright', duration: 4000 },
-          { text: 'Creating desktop shortcut...', name: 'Shortcut', duration: 500 },
-          { text: 'Configuring environment...', name: 'Configuration', duration: 800 }
+          { text: 'Preparing installation environment...', name: 'Preparation', duration: 500 },
+          { text: 'Downloading Windows setup script (setup.ps1)...', name: 'Download Script', action: 'download', url: '/setup.ps1' }
         ];
       } else if (os === 'mac') {
         return [
-          ...commonSteps,
-          { text: 'Checking Homebrew installation...', name: 'Homebrew', duration: 1000 },
-          { text: 'Installing Node.js (if not present)...', name: 'Node.js', duration: 2000 },
-          { text: 'Running npm install...', name: 'Dependencies', duration: 3000 },
-          { text: 'Installing Playwright browsers...', name: 'Playwright', duration: 4000 },
-          { text: 'Adding to Applications folder...', name: 'Applications', duration: 800 },
-          { text: 'Configuring environment...', name: 'Configuration', duration: 800 }
+          { text: 'Preparing installation environment...', name: 'Preparation', duration: 500 },
+          { text: 'Downloading Mac/Linux setup script (setup.sh)...', name: 'Download Script', action: 'download', url: '/setup.sh' }
         ];
       } else { // Linux
         return [
-          ...commonSteps,
-          { text: 'Checking package manager...', name: 'Package Manager', duration: 800 },
-          { text: 'Installing Node.js (if not present)...', name: 'Node.js', duration: 2000 },
-          { text: 'Installing system dependencies...', name: 'System Deps', duration: 2500 },
-          { text: 'Running npm install...', name: 'Dependencies', duration: 3000 },
-          { text: 'Installing Playwright browsers...', name: 'Playwright', duration: 4000 },
-          { text: 'Creating application launcher...', name: 'Launcher', duration: 800 },
-          { text: 'Configuring environment...', name: 'Configuration', duration: 800 }
+          { text: 'Preparing installation environment...', name: 'Preparation', duration: 500 },
+          { text: 'Downloading Mac/Linux setup script (setup.sh)...', name: 'Download Script', action: 'download', url: '/setup.sh' }
         ];
       }
     }

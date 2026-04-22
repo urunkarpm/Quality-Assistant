@@ -39,6 +39,21 @@ const server = http.createServer((req, res) => {
     return;
   }
   
+  // Route: Bash setup script
+  if (url === '/setup.sh') {
+    const filePath = path.join(__dirname, 'setup.sh');
+    fs.readFile(filePath, (err, data) => {
+      if (err) {
+        res.writeHead(404, {'Content-Type': 'text/plain'});
+        res.end('Setup script not found');
+        return;
+      }
+      res.writeHead(200, {'Content-Type': 'application/x-sh; charset=utf-8'});
+      res.end(data);
+    });
+    return;
+  }
+  
   // 404 for everything else
   res.writeHead(404, {'Content-Type': 'text/plain'});
   res.end('Not Found');
