@@ -29,7 +29,8 @@ describe('GET /api/screenshots', () => {
 
   test('returns data_url for a saved screenshot', async () => {
     const scanId = db.createScan('https://example.com', 1);
-    db.saveScreenshot(scanId, 'https://example.com/', 'data:image/jpeg;base64,abc');
+    const issueId = db.createIssue(scanId, { sev: 'minor', type: 'visual', title: 'Test', selector: 'body', page: 'https://example.com/', wcag: '', desc: 'Test issue' });
+    db.saveIssueScreenshot(issueId, 'data:image/jpeg;base64,abc');
     const res = await request(app).get(`/api/screenshots?scanId=${scanId}&page=${encodeURIComponent('https://example.com/')}`);
     expect(res.status).toBe(200);
     expect(res.body.dataUrl).toBe('data:image/jpeg;base64,abc');

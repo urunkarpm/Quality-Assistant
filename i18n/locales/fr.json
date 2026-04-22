@@ -1,0 +1,72 @@
+{
+  "dashboard": {
+    "title": "Assistant Qualité",
+    "subtitle": "Outil d'Audit de Sites Web",
+    "sidebar": {
+      "scans": "Analyses",
+      "issues": "Problèmes",
+      "settings": "Paramètres"
+    },
+    "score": {
+      "label": "Score de Qualité",
+      "critical": "Critique",
+      "major": "Majeur",
+      "minor": "Mineur",
+      "passed": "Réussi"
+    },
+    "stats": {
+      "criticalIssues": "Problèmes Critiques",
+      "majorIssues": "Problèmes Majeurs",
+      "minorIssues": "Problèmes Mineurs",
+      "passedChecks": "Vérifications Réussies"
+    },
+    "issues": {
+      "title": "Problèmes",
+      "severity": "Sévérité",
+      "type": "Type",
+      "description": "Description",
+      "page": "Page",
+      "status": "Statut",
+      "open": "Ouvert",
+      "resolved": "Résolu",
+      "noIssues": "Aucun problème trouvé"
+    },
+    "filters": {
+      "all": "Tous",
+      "critical": "Critiques",
+      "major": "Majeurs",
+      "minor": "Mineurs"
+    },
+    "actions": {
+      "newScan": "Nouvelle Analyse",
+      "export": "Exporter",
+      "refresh": "Actualiser"
+    },
+    "scanForm": {
+      "urlLabel": "URL du Site Web",
+      "urlPlaceholder": "https://exemple.com",
+      "pageLimitLabel": "Limite de Pages",
+      "scanButton": "Démarrer l'Analyse"
+    }
+  },
+  "severity": {
+    "critical": "Critique",
+    "major": "Majeur",
+    "minor": "Mineur"
+  },
+  "checkTypes": {
+    "ada": "ADA / WCAG",
+    "visual": "Visuel",
+    "content": "Contenu",
+    "seo": "SEO",
+    "perf": "Performance",
+    "security": "Sécurité",
+    "links": "Liens"
+  },
+  "timeAgo": {
+    "justNow": "à l'instant",
+    "minutesAgo": "il y a {{count}}m",
+    "hoursAgo": "il y a {{count}}h",
+    "daysAgo": "il y a {{count}}j"
+  }
+}

@@ -29,8 +29,9 @@ describe('computeScore', () => {
 });
 
 describe('runScan onScreenshot callback', () => {
-  test('onScreenshot is optional — runScan signature accepts 4 params', () => {
+  test('onScreenshot is optional — runScan signature accepts 6 params (with new options)', () => {
     const { runScan } = require('../server/scanner/runner');
-    expect(runScan.length).toBe(4);
+    // Updated signature: runScan(url, pageLimit, opts, onIssue, onIssueScreenshot, onProgress)
+    expect(runScan.length).toBe(6);
   });
 });

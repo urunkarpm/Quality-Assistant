@@ -1,0 +1,72 @@
+{
+  "dashboard": {
+    "title": "Asistente de Calidad",
+    "subtitle": "Herramienta de Auditoría de Sitios Web",
+    "sidebar": {
+      "scans": "Escaneos",
+      "issues": "Problemas",
+      "settings": "Configuración"
+    },
+    "score": {
+      "label": "Puntuación de Calidad",
+      "critical": "Crítico",
+      "major": "Mayor",
+      "minor": "Menor",
+      "passed": "Aprobado"
+    },
+    "stats": {
+      "criticalIssues": "Problemas Críticos",
+      "majorIssues": "Problemas Mayores",
+      "minorIssues": "Problemas Menores",
+      "passedChecks": "Verificaciones Aprobadas"
+    },
+    "issues": {
+      "title": "Problemas",
+      "severity": "Severidad",
+      "type": "Tipo",
+      "description": "Descripción",
+      "page": "Página",
+      "status": "Estado",
+      "open": "Abierto",
+      "resolved": "Resuelto",
+      "noIssues": "No se encontraron problemas"
+    },
+    "filters": {
+      "all": "Todos",
+      "critical": "Críticos",
+      "major": "Mayores",
+      "minor": "Menores"
+    },
+    "actions": {
+      "newScan": "Nuevo Escaneo",
+      "export": "Exportar",
+      "refresh": "Actualizar"
+    },
+    "scanForm": {
+      "urlLabel": "URL del Sitio Web",
+      "urlPlaceholder": "https://ejemplo.com",
+      "pageLimitLabel": "Límite de Páginas",
+      "scanButton": "Iniciar Escaneo"
+    }
+  },
+  "severity": {
+    "critical": "Crítico",
+    "major": "Mayor",
+    "minor": "Menor"
+  },
+  "checkTypes": {
+    "ada": "ADA / WCAG",
+    "visual": "Visual",
+    "content": "Contenido",
+    "seo": "SEO",
+    "perf": "Rendimiento",
+    "security": "Seguridad",
+    "links": "Enlaces"
+  },
+  "timeAgo": {
+    "justNow": "ahora mismo",
+    "minutesAgo": "hace {{count}}m",
+    "hoursAgo": "hace {{count}}h",
+    "daysAgo": "hace {{count}}d"
+  }
+}
