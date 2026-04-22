@@ -1,22 +1,5 @@
 // server/scanner/checks/visual.js
-
-function luminance(r, g, b) {
-  return [r, g, b].reduce((acc, c, i) => {
-    const s   = c / 255;
-    const lin = s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4);
-    return acc + lin * [0.2126, 0.7152, 0.0722][i];
-  }, 0);
-}
-
-function contrastRatio(fg, bg) {
-  const l1 = luminance(...fg), l2 = luminance(...bg);
-  return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
-}
-
-function parseRgb(str) {
-  const m = str.match(/rgba?\s*\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*(?:,\s*[\d.]+)?\s*\)/);
-  return m ? [+m[1], +m[2], +m[3]] : null;
-}
+const { parseRgb, luminance, contrastRatio } = require('../utils');
 
 async function check(page, _responseHeaders, pageUrl = '') {
   const path = pageUrl || '/';

@@ -1,1 +1,11 @@
-(docs/superpowers/plans/2026-03-31-screenshot-capture.md, install-server.js, install.html)
+```
+# Dependencies
+node_modules/
+
+# Database
+data/quality.db
+
+# Logs
+*.log
+
+```
