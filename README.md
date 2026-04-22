@@ -55,20 +55,23 @@ score = max(0, 100 − (critical × 10) − (major × 4) − (minor × 1))
 
 ## Getting Started
 
-**Quick Install (Recommended)**
+### Option 1: Web Installer (Recommended for Windows)
 
-The easiest way to install Quality Assistant is using the standalone web installer — no need to run `npm start` first!
+The easiest way to install Quality Assistant on Windows is using the standalone web installer. It automates the entire setup process — installing Python, Visual C++ Build Tools, npm dependencies, and Playwright browser.
 
-1. Start the **installer server**: `npm run install:server`
+1. Start the **installer server**:
+   ```bash
+   npm run install:server
+   ```
 2. Open **http://localhost:3001/install** in your browser
 3. Click the **Install Now** button
 4. Follow the on-screen instructions
 
-The installer will automatically download and run the setup script for your operating system.
+The installer will automatically download and run the appropriate setup script for your operating system. Once complete, you can start the application with `npm start`.
 
 ---
 
-**Manual Installation**
+### Option 2: Manual Installation
 
 **1. Clone the repository**
 
@@ -91,6 +94,8 @@ powershell -ExecutionPolicy Bypass -File setup.ps1
 npm install
 npx playwright install chromium
 ```
+
+> **Note:** On macOS/Linux, you may need to install system dependencies for Playwright. See the [Playwright documentation](https://playwright.dev/docs/browsers) for details.
 
 **3. Start the server**
 
