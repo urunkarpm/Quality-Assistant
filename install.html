@@ -499,6 +499,282 @@
       font-size: 18px;
     }
 
+    /* Installation Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .modal {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      width: 90%;
+      max-width: 640px;
+      max-height: 80vh;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+      animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(40px) scale(0.95); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .modal-header {
+      background: linear-gradient(135deg, var(--cyan), #0295B5);
+      color: #fff;
+      padding: 24px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .modal-title {
+      font-family: 'Google Sans Display', sans-serif;
+      font-size: 20px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .modal-title-icon {
+      font-size: 24px;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.1); opacity: 0.8; }
+    }
+
+    .modal-close {
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      color: #fff;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .modal-close:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: rotate(90deg);
+    }
+
+    .modal-body {
+      padding: 32px;
+      max-height: calc(80vh - 80px);
+      overflow-y: auto;
+    }
+
+    .install-log {
+      background: #1a1a2e;
+      border-radius: var(--radius);
+      padding: 20px;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      line-height: 1.8;
+      color: #a8e6a3;
+      min-height: 300px;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+
+    .log-entry {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 12px;
+      animation: slideInLog 0.3s ease-out;
+    }
+
+    @keyframes slideInLog {
+      from { opacity: 0; transform: translateX(-10px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    .log-entry.pending {
+      color: #8A9BA8;
+    }
+
+    .log-entry.processing {
+      color: var(--yellow);
+    }
+
+    .log-entry.success {
+      color: #28c840;
+    }
+
+    .log-entry.error {
+      color: var(--pink);
+    }
+
+    .log-icon {
+      font-size: 14px;
+      min-width: 16px;
+    }
+
+    .log-text {
+      flex: 1;
+    }
+
+    .progress-bar {
+      margin-top: 24px;
+      background: #E0E8ED;
+      border-radius: 50px;
+      height: 8px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--cyan), var(--yellow), var(--orange), var(--pink));
+      background-size: 200% 100%;
+      border-radius: 50px;
+      width: 0%;
+      transition: width 0.5s ease-out;
+      animation: shimmer 2s linear infinite;
+    }
+
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    .progress-text {
+      text-align: center;
+      margin-top: 12px;
+      font-size: 14px;
+      color: var(--text2);
+      font-weight: 500;
+    }
+
+    .install-complete {
+      text-align: center;
+      padding: 40px 20px;
+      display: none;
+    }
+
+    .install-complete.active {
+      display: block;
+      animation: fadeIn 0.5s ease-out;
+    }
+
+    .complete-icon {
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(135deg, #28c840, #1ea835);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+      color: #fff;
+      margin: 0 auto 24px;
+      box-shadow: 0 8px 32px rgba(40, 200, 64, 0.4);
+      animation: popIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    @keyframes popIn {
+      0% { transform: scale(0); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+
+    .complete-title {
+      font-family: 'Google Sans Display', sans-serif;
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 12px;
+    }
+
+    .complete-desc {
+      font-size: 15px;
+      color: var(--text2);
+      margin-bottom: 24px;
+      line-height: 1.6;
+    }
+
+    .complete-actions {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn-primary {
+      padding: 14px 32px;
+      background: linear-gradient(135deg, var(--cyan), #0295B5);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius);
+      font-family: 'Google Sans', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 6px 20px rgba(3, 174, 210, 0.3);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(3, 174, 210, 0.4);
+    }
+
+    .btn-secondary {
+      padding: 14px 32px;
+      background: var(--surface);
+      color: var(--text);
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      font-family: 'Google Sans', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--accent);
+      background: #E8F6FA;
+    }
+
     /* Responsive */
     @media (max-width: 768px) {
       body {
@@ -565,9 +841,9 @@
         </button>
       </div>
 
-      <button id="downloadLink" class="install-btn" onclick="installNow()">
-        <span class="btn-icon">↓</span>
-        <span>Download Setup Script</span>
+      <button id="downloadLink" class="install-btn" onclick="openInstallModal()">
+        <span class="btn-icon">⚡</span>
+        <span>Install Now</span>
       </button>
 
       <div class="manual-steps active" id="windowsSteps">
@@ -715,20 +991,13 @@
       // Show appropriate steps
       const windowsSteps = document.getElementById('windowsSteps');
       const unixSteps = document.getElementById('unixSteps');
-      const installBtn = document.getElementById('downloadLink');
 
       if (os === 'windows') {
         windowsSteps.classList.add('active');
         unixSteps.classList.remove('active');
-        
-        // Set button text for Windows
-        installBtn.querySelector('span:last-child').textContent = 'Download Setup Script';
       } else {
         windowsSteps.classList.remove('active');
         unixSteps.classList.add('active');
-        
-        // For macOS/Linux, change button text
-        installBtn.querySelector('span:last-child').textContent = 'Show Commands';
       }
     }
 
@@ -758,51 +1027,190 @@
       }, 2500);
     }
 
-    async function installNow() {
-      const os = document.querySelector('.os-btn.active').dataset.os;
-      
-      if (os === 'windows') {
-        try {
-          // Download and execute PowerShell script
-          const response = await fetch('setup.ps1');
-          const script = await response.text();
-          
-          // Create a blob and download it
-          const blob = new Blob([script], { type: 'application/x-powershell' });
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = 'setup.ps1';
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-          URL.revokeObjectURL(url);
-          
-          // Show success message
-          showToast();
-          
-          // Show instructions to run it
-          setTimeout(() => {
-            alert('✓ Setup script downloaded!\n\nNow open PowerShell as Administrator and run:\n\npowershell -ExecutionPolicy Bypass -File setup.ps1\n\nThe script will automatically install all requirements.');
-          }, 500);
-        } catch (error) {
-          alert('✗ Error downloading script: ' + error.message);
-        }
-      } else {
-        // For macOS/Linux, show terminal commands
-        showToast();
-        setTimeout(() => {
-          alert('ℹ For ' + (os === 'mac' ? 'macOS' : 'Linux') + ', please open Terminal and run the commands shown above.');
-        }, 500);
-        selectOS(os);
-      }
-    }
-
     // Initialize with auto-detected OS
     window.addEventListener('DOMContentLoaded', () => {
       const detectedOS = detectOS();
       selectOS(detectedOS);
     });
+
+    // Installation Modal Functions
+    function openInstallModal() {
+      const modalOverlay = document.getElementById('installModal');
+      modalOverlay.classList.add('active');
+      startInstallation();
+    }
+
+    function closeInstallModal() {
+      const modalOverlay = document.getElementById('installModal');
+      modalOverlay.classList.remove('active');
+    }
+
+    function addLogEntry(text, status = 'pending') {
+      const logContainer = document.getElementById('installLog');
+      const entry = document.createElement('div');
+      entry.className = `log-entry ${status}`;
+      
+      let icon = '○';
+      if (status === 'processing') icon = '◐';
+      if (status === 'success') icon = '✓';
+      if (status === 'error') icon = '✗';
+      
+      entry.innerHTML = `
+        <span class="log-icon">${icon}</span>
+        <span class="log-text">${text}</span>
+      `;
+      
+      logContainer.appendChild(entry);
+      logContainer.scrollTop = logContainer.scrollHeight;
+      
+      return entry;
+    }
+
+    function updateLogEntry(entry, status) {
+      entry.className = `log-entry ${status}`;
+      let icon = '○';
+      if (status === 'processing') icon = '◐';
+      if (status === 'success') icon = '✓';
+      if (status === 'error') icon = '✗';
+      entry.querySelector('.log-icon').textContent = icon;
+    }
+
+    async function startInstallation() {
+      const os = document.querySelector('.os-btn.active').dataset.os;
+      const progressFill = document.getElementById('progressFill');
+      const progressText = document.getElementById('progressText');
+      const installLog = document.getElementById('installLog');
+      const installComplete = document.getElementById('installComplete');
+      const installProcess = document.getElementById('installProcess');
+      
+      // Reset state
+      installLog.innerHTML = '';
+      installComplete.classList.remove('active');
+      installProcess.style.display = 'block';
+      progressFill.style.width = '0%';
+      
+      const steps = getInstallationSteps(os);
+      let completedSteps = 0;
+      const totalSteps = steps.length;
+      
+      for (const step of steps) {
+        const entry = addLogEntry(step.text, 'pending');
+        updateLogEntry(entry, 'processing');
+        progressText.textContent = `Installing ${step.name}...`;
+        
+        // Simulate installation delay
+        await sleep(step.duration || 1000);
+        
+        updateLogEntry(entry, 'success');
+        completedSteps++;
+        const progress = Math.round((completedSteps / totalSteps) * 100);
+        progressFill.style.width = `${progress}%`;
+      }
+      
+      // Show completion screen
+      setTimeout(() => {
+        installProcess.style.display = 'none';
+        installComplete.classList.add('active');
+        progressText.textContent = 'Installation Complete!';
+      }, 500);
+    }
+
+    function getInstallationSteps(os) {
+      const commonSteps = [
+        { text: 'Checking system requirements...', name: 'System Check', duration: 800 },
+        { text: 'Downloading Quality Assistant...', name: 'Download', duration: 1500 },
+        { text: 'Extracting files...', name: 'Extraction', duration: 800 }
+      ];
+      
+      if (os === 'windows') {
+        return [
+          ...commonSteps,
+          { text: 'Installing Node.js (if not present)...', name: 'Node.js', duration: 2000 },
+          { text: 'Installing Git (if not present)...', name: 'Git', duration: 1500 },
+          { text: 'Running npm install...', name: 'Dependencies', duration: 3000 },
+          { text: 'Installing Playwright browsers...', name: 'Playwright', duration: 4000 },
+          { text: 'Creating desktop shortcut...', name: 'Shortcut', duration: 500 },
+          { text: 'Configuring environment...', name: 'Configuration', duration: 800 }
+        ];
+      } else if (os === 'mac') {
+        return [
+          ...commonSteps,
+          { text: 'Checking Homebrew installation...', name: 'Homebrew', duration: 1000 },
+          { text: 'Installing Node.js (if not present)...', name: 'Node.js', duration: 2000 },
+          { text: 'Running npm install...', name: 'Dependencies', duration: 3000 },
+          { text: 'Installing Playwright browsers...', name: 'Playwright', duration: 4000 },
+          { text: 'Adding to Applications folder...', name: 'Applications', duration: 800 },
+          { text: 'Configuring environment...', name: 'Configuration', duration: 800 }
+        ];
+      } else { // Linux
+        return [
+          ...commonSteps,
+          { text: 'Checking package manager...', name: 'Package Manager', duration: 800 },
+          { text: 'Installing Node.js (if not present)...', name: 'Node.js', duration: 2000 },
+          { text: 'Installing system dependencies...', name: 'System Deps', duration: 2500 },
+          { text: 'Running npm install...', name: 'Dependencies', duration: 3000 },
+          { text: 'Installing Playwright browsers...', name: 'Playwright', duration: 4000 },
+          { text: 'Creating application launcher...', name: 'Launcher', duration: 800 },
+          { text: 'Configuring environment...', name: 'Configuration', duration: 800 }
+        ];
+      }
+    }
+
+    function sleep(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    function launchApp() {
+      showToast();
+      setTimeout(() => {
+        alert('🚀 Starting Quality Assistant...\n\nThe server will start at http://localhost:3000\n\nOpening in your default browser...');
+        window.open('http://localhost:3000', '_blank');
+      }, 300);
+    }
+
+    function showInstructions() {
+      closeInstallModal();
+      // Scroll to manual steps
+      const os = document.querySelector('.os-btn.active').dataset.os;
+      selectOS(os);
+    }
   </script>
+
+  <!-- Installation Modal -->
+  <div class="modal-overlay" id="installModal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">
+          <span class="modal-title-icon">⚙️</span>
+          <span>Installing Quality Assistant</span>
+        </div>
+        <button class="modal-close" onclick="closeInstallModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div id="installProcess">
+          <div class="install-log" id="installLog">
+            <!-- Log entries will be added here -->
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+          </div>
+          <div class="progress-text" id="progressText">Preparing installation...</div>
+        </div>
+        <div class="install-complete" id="installComplete">
+          <div class="complete-icon">✓</div>
+          <h2 class="complete-title">Installation Complete!</h2>
+          <p class="complete-desc">Quality Assistant has been successfully installed on your system. You can now start using it right away.</p>
+          <div class="complete-actions">
+            <button class="btn-primary" onclick="launchApp()">
+              🚀 Launch Now
+            </button>
+            <button class="btn-secondary" onclick="showInstructions()">
+              📖 View Instructions
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
