@@ -1,0 +1,72 @@
+{
+  "dashboard": {
+    "title": "Quality Assistant",
+    "subtitle": "Website Quality Auditing Tool",
+    "sidebar": {
+      "scans": "Scans",
+      "issues": "Issues",
+      "settings": "Settings"
+    },
+    "score": {
+      "label": "Quality Score",
+      "critical": "Critical",
+      "major": "Major",
+      "minor": "Minor",
+      "passed": "Passed"
+    },
+    "stats": {
+      "criticalIssues": "Critical Issues",
+      "majorIssues": "Major Issues",
+      "minorIssues": "Minor Issues",
+      "passedChecks": "Passed Checks"
+    },
+    "issues": {
+      "title": "Issues",
+      "severity": "Severity",
+      "type": "Type",
+      "description": "Description",
+      "page": "Page",
+      "status": "Status",
+      "open": "Open",
+      "resolved": "Resolved",
+      "noIssues": "No issues found"
+    },
+    "filters": {
+      "all": "All",
+      "critical": "Critical",
+      "major": "Major",
+      "minor": "Minor"
+    },
+    "actions": {
+      "newScan": "New Scan",
+      "export": "Export",
+      "refresh": "Refresh"
+    },
+    "scanForm": {
+      "urlLabel": "Website URL",
+      "urlPlaceholder": "https://example.com",
+      "pageLimitLabel": "Page Limit",
+      "scanButton": "Start Scan"
+    }
+  },
+  "severity": {
+    "critical": "Critical",
+    "major": "Major",
+    "minor": "Minor"
+  },
+  "checkTypes": {
+    "ada": "ADA / WCAG",
+    "visual": "Visual",
+    "content": "Content",
+    "seo": "SEO",
+    "perf": "Performance",
+    "security": "Security",
+    "links": "Links"
+  },
+  "timeAgo": {
+    "justNow": "just now",
+    "minutesAgo": "{{count}}m ago",
+    "hoursAgo": "{{count}}h ago",
+    "daysAgo": "{{count}}d ago"
+  }
+}

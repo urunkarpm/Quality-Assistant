@@ -1,12 +1,45 @@
 // server/scanner/runner.js
 const { chromium }  = require('playwright');
 const { crawl }     = require('./crawler');
+const fs            = require('fs');
+const path          = require('path');
+
+// Built-in checks
 const adaCheck      = require('./checks/ada');
 const visualCheck   = require('./checks/visual');
 const contentCheck  = require('./checks/content');
 const seoCheck      = require('./checks/seo');
 const perfCheck     = require('./checks/perf');
 const securityCheck = require('./checks/security');
+
+// Load plugins dynamically
+function loadPlugins() {
+  const pluginsDir = path.join(__dirname, 'plugins');
+  const plugins = [];
+  
+  if (!fs.existsSync(pluginsDir)) {
+    return plugins;
+  }
+  
+  const files = fs.readdirSync(pluginsDir);
+  for (const file of files) {
+    if (file.endsWith('.js') && !file.startsWith('.')) {
+      try {
+        const pluginPath = path.join(pluginsDir, file);
+        const checkFn = require(pluginPath);
+        if (typeof checkFn === 'function') {
+          const name = path.basename(file, '.js');
+          plugins.push({ fn: checkFn, name: `Plugin: ${name}` });
+          console.log(`[runner] Loaded plugin: ${name}`);
+        }
+      } catch (err) {
+        console.warn(`[runner] Failed to load plugin ${file}: ${err.message}`);
+      }
+    }
+  }
+  
+  return plugins;
+}
 
 function computeScore(issues) {
   const c = issues.filter(i => i.sev === 'critical').length;
@@ -68,10 +101,41 @@ async function captureElementScreenshot(page, selector, sev) {
   }
 }
 
+async function runChecksForPage(page, responseHeaders, pageUrl, checks, onProgress) {
+  const pageIssues = [];
+  const allIssues = [];
+  
+  // Run all checks in parallel
+  const checkPromises = checks.map(async ({ fn, name }) => {
+    if (onProgress) onProgress(`[${pageUrl}] Checking ${name}…`);
+    try {
+      const found = await fn(page, responseHeaders, pageUrl);
+      if (onProgress) onProgress(`[${pageUrl}] ${name} — ${found.length} issue${found.length !== 1 ? 's' : ''}`);
+      return { name, issues: found };
+    } catch (err) {
+      console.warn(`[runner] ${fn.name || name} failed on ${pageUrl}: ${err.message}`);
+      if (onProgress) onProgress(`[${pageUrl}] ${name} — error`);
+      return { name, issues: [] };
+    }
+  });
+  
+  const results = await Promise.all(checkPromises);
+  
+  for (const { name, issues } of results) {
+    for (const issue of issues) {
+      allIssues.push(issue);
+      pageIssues.push({ issue, id: null }); // id will be set by caller
+    }
+  }
+  
+  return { allIssues, pageIssues };
+}
+
 async function runScan(url, pageLimit, opts, onIssue, onIssueScreenshot, onProgress) {
   const browser   = await chromium.launch({ headless: !opts?.headed });
   const allIssues = [];
-
+  const concurrency = opts?.concurrency || 3; // Number of pages to scan concurrently
+  
   const checks = [
     { fn: adaCheck,      name: 'ADA / WCAG' },
     { fn: visualCheck,   name: 'Visual' },
@@ -80,33 +144,31 @@ async function runScan(url, pageLimit, opts, onIssue, onIssueScreenshot, onProgr
     { fn: securityCheck, name: 'Security' },
     { fn: perfCheck,     name: 'Performance' },
   ];
+  
+  // Load custom plugins
+  const plugins = loadPlugins();
+  checks.push(...plugins);
 
   try {
     if (onProgress) onProgress(`Crawling ${url}…`);
     const pages = await crawl(browser, url, pageLimit);
     if (onProgress) onProgress(`Found ${pages.length} page${pages.length !== 1 ? 's' : ''}`);
 
-    for (const { url: pageUrl, page, responseHeaders } of pages) {
+    // Process pages with configurable concurrency
+    const pagesScanned = pages.length;
+    
+    // Parallel page processing
+    const processPage = async ({ url: pageUrl, page, responseHeaders }) => {
       try {
-        // Collect issues and their DB IDs
-        const pageIssues = []; // { issue, id }
-
-        for (const { fn, name } of checks) {
-          if (onProgress) onProgress(`[${pageUrl}] Checking ${name}…`);
-          try {
-            const found = await fn(page, responseHeaders, pageUrl);
-            for (const issue of found) {
-              allIssues.push(issue);
-              const issueId = onIssue ? onIssue(issue) : null;
-              pageIssues.push({ issue, id: issueId });
-            }
-            if (onProgress) onProgress(`[${pageUrl}] ${name} — ${found.length} issue${found.length !== 1 ? 's' : ''}`);
-          } catch (err) {
-            console.warn(`[runner] ${fn.name} failed on ${pageUrl}: ${err.message}`);
-            if (onProgress) onProgress(`[${pageUrl}] ${name} — error`);
-          }
+        const { allIssues: pageAllIssues, pageIssues } = await runChecksForPage(
+          page, responseHeaders, pageUrl, checks, onProgress
+        );
+        
+        // Register issues and get IDs
+        for (const item of pageIssues) {
+          item.id = onIssue ? onIssue(item.issue) : null;
         }
-
+        
         // Capture per-issue cropped screenshots (deduplicate by selector)
         if (onIssueScreenshot) {
           const cache = new Map(); // selector -> dataUrl
@@ -126,15 +188,30 @@ async function runScan(url, pageLimit, opts, onIssue, onIssueScreenshot, onProgr
           }
           if (onProgress) onProgress(`[${pageUrl}] ${captured} element screenshot${captured !== 1 ? 's' : ''} saved`);
         }
+        
+        return pageAllIssues;
       } finally {
         await page.close();
       }
+    };
+    
+    // Process pages with concurrency limit
+    const pageBatches = [];
+    for (let i = 0; i < pages.length; i += concurrency) {
+      pageBatches.push(pages.slice(i, i + concurrency));
+    }
+    
+    for (const batch of pageBatches) {
+      const batchResults = await Promise.all(batch.map(processPage));
+      for (const issues of batchResults) {
+        allIssues.push(...issues);
+      }
     }
 
-    return { issues: allIssues, pagesScanned: pages.length };
+    return { issues: allIssues, pagesScanned };
   } finally {
     await browser.close();
   }
 }
 
-module.exports = { computeScore, runScan };
+module.exports = { computeScore, runScan, loadPlugins };
