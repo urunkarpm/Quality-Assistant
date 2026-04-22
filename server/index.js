@@ -13,6 +13,17 @@ app.use(express.json());
 app.use(i18n.i18nMiddleware);
 app.use(express.static(path.join(__dirname, '../dashboard')));
 
+// Serve the install page at /install
+app.get('/install', (_req, res) => {
+  res.sendFile(path.join(__dirname, '../install.html'));
+});
+
+// Allow downloading setup.ps1 directly
+app.get('/setup.ps1', (req, res) => {
+  res.setHeader('Content-Type', 'text/plain');
+  res.sendFile(path.join(__dirname, '../setup.ps1'));
+});
+
 // API routes
 app.use('/api/scans',       require('./routes/scans'));
 app.use('/api/issues',      require('./routes/issues'));

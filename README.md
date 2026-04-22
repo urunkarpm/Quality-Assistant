@@ -55,6 +55,21 @@ score = max(0, 100 − (critical × 10) − (major × 4) − (minor × 1))
 
 ## Getting Started
 
+**Quick Install (Recommended)**
+
+The easiest way to install Quality Assistant is using the standalone web installer — no need to run `npm start` first!
+
+1. Start the **installer server**: `npm run install:server`
+2. Open **http://localhost:3001/install** in your browser
+3. Click the **Install Now** button
+4. Follow the on-screen instructions
+
+The installer will automatically download and run the setup script for your operating system.
+
+---
+
+**Manual Installation**
+
 **1. Clone the repository**
 
 ```bash

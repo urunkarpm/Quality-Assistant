@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Install Quality Assistant</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;600;700&family=Google+Sans+Display:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #F7F5F0;
+      --surface: #FFFFFF;
+      --text: #1A1814;
+      --text2: #6B6860;
+      --text3: #9E9C98;
+      --accent: #D4890A;
+      --accent-hover: #B5760A;
+      --border: #E0DDD6;
+      --shadow: 0 4px 20px rgba(0,0,0,0.08);
+      --radius: 8px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Google Sans', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 600px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .logo {
+      width: 80px;
+      height: 80px;
+      background: var(--accent);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Google Sans Display', sans-serif;
+      font-weight: 700;
+      font-size: 36px;
+      color: #fff;
+      margin: 0 auto 24px;
+      box-shadow: var(--shadow);
+    }
+
+    h1 {
+      font-family: 'Google Sans Display', sans-serif;
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      letter-spacing: -0.02em;
+    }
+
+    .subtitle {
+      font-size: 16px;
+      color: var(--text2);
+      line-height: 1.6;
+      margin-bottom: 32px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 32px;
+      box-shadow: var(--shadow);
+      margin-bottom: 24px;
+    }
+
+    .os-selector {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin-bottom: 24px;
+    }
+
+    .os-btn {
+      padding: 12px 24px;
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      font-family: 'Google Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .os-btn:hover {
+      border-color: var(--accent);
+      background: #FFFDF5;
+    }
+
+    .os-btn.active {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .os-icon {
+      font-size: 20px;
+    }
+
+    .install-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 40px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius);
+      font-family: 'Google Sans', sans-serif;
+      font-size: 18px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 4px 12px rgba(212, 137, 10, 0.3);
+      text-decoration: none;
+    }
+
+    .install-btn:hover {
+      background: var(--accent-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(212, 137, 10, 0.4);
+    }
+
+    .install-btn:active {
+      transform: translateY(0);
+    }
+
+    .btn-icon {
+      font-size: 24px;
+    }
+
+    .features {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-top: 32px;
+      text-align: left;
+    }
+
+    .feature {
+      padding: 16px;
+      background: var(--bg);
+      border-radius: var(--radius);
+    }
+
+    .feature-icon {
+      font-size: 24px;
+      margin-bottom: 8px;
+    }
+
+    .feature-title {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .feature-desc {
+      font-size: 12px;
+      color: var(--text3);
+      line-height: 1.4;
+    }
+
+    .requirements {
+      margin-top: 24px;
+      padding: 20px;
+      background: #FFFDF5;
+      border: 1px solid #FDF3E0;
+      border-radius: var(--radius);
+      text-align: left;
+    }
+
+    .requirements h3 {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: var(--accent);
+    }
+
+    .requirements ul {
+      list-style: none;
+      font-size: 13px;
+      color: var(--text2);
+    }
+
+    .requirements li {
+      padding: 4px 0;
+      padding-left: 20px;
+      position: relative;
+    }
+
+    .requirements li::before {
+      content: '✓';
+      position: absolute;
+      left: 0;
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .manual-steps {
+      display: none;
+      margin-top: 24px;
+      text-align: left;
+    }
+
+    .manual-steps.active {
+      display: block;
+    }
+
+    .step {
+      padding: 16px;
+      background: var(--bg);
+      border-radius: var(--radius);
+      margin-bottom: 12px;
+    }
+
+    .step-num {
+      display: inline-block;
+      width: 24px;
+      height: 24px;
+      background: var(--accent);
+      color: #fff;
+      border-radius: 50%;
+      text-align: center;
+      line-height: 24px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-right: 8px;
+    }
+
+    .step-title {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    code {
+      display: block;
+      background: #1a1a1a;
+      color: #a8e6a3;
+      padding: 12px 16px;
+      border-radius: 6px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      margin-top: 8px;
+      overflow-x: auto;
+    }
+
+    .copy-btn {
+      float: right;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 4px 8px;
+      font-size: 11px;
+      cursor: pointer;
+      color: var(--text3);
+      transition: all 0.2s;
+    }
+
+    .copy-btn:hover {
+      background: var(--surface2);
+      color: var(--text);
+    }
+
+    footer {
+      margin-top: 40px;
+      font-size: 12px;
+      color: var(--text3);
+    }
+
+    footer a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 600px) {
+      .features {
+        grid-template-columns: 1fr;
+      }
+
+      .os-selector {
+        flex-direction: column;
+      }
+
+      h1 {
+        font-size: 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo">Q</div>
+    
+    <h1>Install Quality Assistant</h1>
+    <p class="subtitle">A local website quality auditing tool that checks accessibility, visual, content, SEO, performance, and security issues — all in one click.</p>
+
+    <div class="card">
+      <div class="os-selector">
+        <button class="os-btn active" data-os="windows" onclick="selectOS('windows')">
+          <span class="os-icon">🪟</span>
+          Windows
+        </button>
+        <button class="os-btn" data-os="mac" onclick="selectOS('mac')">
+          <span class="os-icon">🍎</span>
+          macOS
+        </button>
+        <button class="os-btn" data-os="linux" onclick="selectOS('linux')">
+          <span class="os-icon">🐧</span>
+          Linux
+        </button>
+      </div>
+
+      <button id="downloadLink" class="install-btn" onclick="installNow()">
+        <span class="btn-icon">⬇</span>
+        <span>Install Now</span>
+      </button>
+
+      <div class="manual-steps active" id="windowsSteps">
+        <div class="step">
+          <div class="step-title"><span class="step-num">1</span>Download the setup script</div>
+          <code><button class="copy-btn" onclick="copyCode(this)">Copy</button>powershell -ExecutionPolicy Bypass -File setup.ps1</code>
+        </div>
+        <div class="step">
+          <div class="step-title"><span class="step-num">2</span>Start the server</div>
+          <code><button class="copy-btn" onclick="copyCode(this)">Copy</button>npm start</code>
+        </div>
+        <div class="step">
+          <div class="step-title"><span class="step-num">3</span>Open your browser</div>
+          <code>http://localhost:3000</code>
+        </div>
+      </div>
+
+      <div class="manual-steps" id="unixSteps">
+        <div class="step">
+          <div class="step-title"><span class="step-num">1</span>Clone the repository</div>
+          <code><button class="copy-btn" onclick="copyCode(this)">Copy</button>git clone https://github.com/urunkarpm/Quality-Assistant.git<br>cd Quality-Assistant</code>
+        </div>
+        <div class="step">
+          <div class="step-title"><span class="step-num">2</span>Install dependencies</div>
+          <code><button class="copy-btn" onclick="copyCode(this)">Copy</button>npm install<br>npx playwright install chromium</code>
+        </div>
+        <div class="step">
+          <div class="step-title"><span class="step-num">3</span>Start the server</div>
+          <code><button class="copy-btn" onclick="copyCode(this)">Copy</button>npm start</code>
+        </div>
+        <div class="step">
+          <div class="step-title"><span class="step-num">4</span>Open your browser</div>
+          <code>http://localhost:3000</code>
+        </div>
+      </div>
+
+      <div class="requirements">
+        <h3>⚙️ Requirements</h3>
+        <ul>
+          <li>Node.js v18 or newer</li>
+          <li>npm v9 or newer</li>
+          <li>Windows: PowerShell (Administrator)</li>
+          <li>macOS/Linux: Git (optional, for cloning)</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="features">
+      <div class="feature">
+        <div class="feature-icon">♿</div>
+        <div class="feature-title">Accessibility</div>
+        <div class="feature-desc">WCAG compliance checks with axe-core integration</div>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🎨</div>
+        <div class="feature-title">Visual</div>
+        <div class="feature-desc">Contrast ratios, font sizes, and image analysis</div>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🔒</div>
+        <div class="feature-title">Security</div>
+        <div class="feature-desc">HTTP headers and security best practices</div>
+      </div>
+    </div>
+
+    <footer>
+      <p>Quality Assistant is open source. <a href="https://github.com/urunkarpm/Quality-Assistant" target="_blank">View on GitHub</a></p>
+      <p style="margin-top: 8px;">Already installed? <a href="/" style="color: var(--accent);">Launch Dashboard →</a></p>
+    </footer>
+  </div>
+
+  <script>
+    // Auto-detect OS
+    function detectOS() {
+      const platform = navigator.platform.toLowerCase();
+      const userAgent = navigator.userAgent.toLowerCase();
+      
+      if (platform.includes('win')) return 'windows';
+      if (platform.includes('mac')) return 'mac';
+      if (platform.includes('linux')) return 'linux';
+      
+      // Fallback to user agent
+      if (userAgent.includes('win')) return 'windows';
+      if (userAgent.includes('mac')) return 'mac';
+      if (userAgent.includes('linux')) return 'linux';
+      
+      return 'windows'; // Default
+    }
+
+    function selectOS(os) {
+      // Update button states
+      document.querySelectorAll('.os-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.dataset.os === os) {
+          btn.classList.add('active');
+        }
+      });
+
+      // Show appropriate steps
+      const windowsSteps = document.getElementById('windowsSteps');
+      const unixSteps = document.getElementById('unixSteps');
+      const installBtn = document.getElementById('downloadLink');
+
+      if (os === 'windows') {
+        windowsSteps.classList.add('active');
+        unixSteps.classList.remove('active');
+        
+        // Set button text for Windows
+        installBtn.querySelector('span:last-child').textContent = 'Install Now';
+      } else {
+        windowsSteps.classList.remove('active');
+        unixSteps.classList.add('active');
+        
+        // For macOS/Linux, change button text
+        installBtn.querySelector('span:last-child').textContent = 'Show Commands';
+      }
+    }
+
+    function copyCode(btn) {
+      const code = btn.parentElement.textContent.replace('Copy', '').trim();
+      navigator.clipboard.writeText(code).then(() => {
+        const originalText = btn.textContent;
+        btn.textContent = 'Copied!';
+        btn.style.background = '#28c840';
+        btn.style.color = '#fff';
+        setTimeout(() => {
+          btn.textContent = originalText;
+          btn.style.background = '';
+          btn.style.color = '';
+        }, 2000);
+      });
+    }
+
+    async function installNow() {
+      const os = document.querySelector('.os-btn.active').dataset.os;
+      
+      if (os === 'windows') {
+        try {
+          // Download and execute PowerShell script
+          const response = await fetch('setup.ps1');
+          const script = await response.text();
+          
+          // Create a blob and download it
+          const blob = new Blob([script], { type: 'application/x-powershell' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'setup.ps1';
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+          
+          // Show instructions to run it
+          alert('✅ Setup script downloaded!\n\nNow open PowerShell as Administrator and run:\n\npowershell -ExecutionPolicy Bypass -File setup.ps1\n\nThe script will automatically install all requirements.');
+        } catch (error) {
+          alert('❌ Error downloading script: ' + error.message);
+        }
+      } else {
+        // For macOS/Linux, show terminal commands
+        alert('📋 For ' + (os === 'mac' ? 'macOS' : 'Linux') + ', please open Terminal and run the commands shown below.');
+        selectOS(os);
+      }
+    }
+
+    // Initialize with auto-detected OS
+    window.addEventListener('DOMContentLoaded', () => {
+      const detectedOS = detectOS();
+      selectOS(detectedOS);
+    });
+  </script>
+</body>
+</html>

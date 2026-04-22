@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "scripts": {
     "start": "node server/index.js",
+    "install:server": "node install-server.js",
     "test":  "jest --runInBand"
   },
   "dependencies": {
