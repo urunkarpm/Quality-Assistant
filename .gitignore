@@ -16,17 +16,22 @@ venv/
 .venv/
 .env
 .env.local
-.env.*
+*.env.*
 
 # Build directories
 dist/
 build/
 target/
-.coverage
-coverage/
-htmlcov/
+*.jar
+*.war
 
-# Editors and IDEs
+# Logs and temp files
+*.log
+*.tmp
+*.swp
+*.swo
+
+# Editors
 .vscode/
 .idea/
 *.swp
@@ -35,22 +40,18 @@ htmlcov/
 # System files
 .DS_Store
 Thumbs.db
-*.log
-*.tmp
+
+# Coverage
+coverage/
+htmlcov/
+.coverage
 
 # Python specific
-*.pyc
-__pycache__/
 .mypy_cache/
 .pytest_cache/
 
-# Java specific
-*.class
-*.jar
+# Gradle
 .gradle/
-
-# Node specific
-node_modules/
 
 # Compressed files
 *.zip
@@ -71,3 +72,7 @@ node_modules/
 *.Z
 *.lz
 *.lzo
+*.tar.gz
+*.tar.bz2
+*.tar.xz
+*.tar.zst

@@ -1040,7 +1040,7 @@
     </a>
     <a class="nav-item" data-view="issues" onclick="switchView('issues')">
       <span class="icon mi">warning</span> Issues
-      <span class="nav-badge">0</span>
+      <span class="nav-badge"></span>
     </a>
     <a class="nav-item" data-view="scans" onclick="switchView('scans')">
       <span class="icon mi">history</span> Scans
@@ -1078,36 +1078,15 @@
           <circle class="fill"  cx="50" cy="50" r="45"/>
         </svg>
         <div class="score-label">
-          <span class="num">74</span>
+          <span class="num">—</span>
           <span class="denom">/100</span>
         </div>
       </div>
 
       <div class="score-meta">
         <h2>ADA Compliance Score</h2>
-        <p>Site partially meets WCAG 2.1 AA standards. 8 critical violations require immediate attention before this site can be considered compliant.</p>
-        <div class="score-bars">
-          <div class="bar-row">
-            <span class="bar-label">Perceivable</span>
-            <div class="bar-track"><div class="bar-fill" style="width:62%;background:var(--major)"></div></div>
-            <span class="bar-val">62</span>
-          </div>
-          <div class="bar-row">
-            <span class="bar-label">Operable</span>
-            <div class="bar-track"><div class="bar-fill" style="width:81%;background:var(--pass)"></div></div>
-            <span class="bar-val">81</span>
-          </div>
-          <div class="bar-row">
-            <span class="bar-label">Understandable</span>
-            <div class="bar-track"><div class="bar-fill" style="width:90%;background:var(--pass)"></div></div>
-            <span class="bar-val">90</span>
-          </div>
-          <div class="bar-row">
-            <span class="bar-label">Robust</span>
-            <div class="bar-track"><div class="bar-fill" style="width:55%;background:var(--crit)"></div></div>
-            <span class="bar-val">55</span>
-          </div>
-        </div>
+        <p>Enter a URL and run a scan to get compliance insights.</p>
+        <div class="score-bars"></div>
       </div>
 
       <div class="scan-log" id="scan-log">
@@ -1128,22 +1107,22 @@
     <div class="stats-row">
       <div class="stat-card crit">
         <div class="stat-label"><span class="mi" style="font-size:13px;vertical-align:-2px">error</span> Critical</div>
-        <div class="stat-num crit">8</div>
+        <div class="stat-num crit">—</div>
         <div class="stat-sub">ADA violations</div>
       </div>
       <div class="stat-card major">
         <div class="stat-label"><span class="mi" style="font-size:13px;vertical-align:-2px">warning</span> Major</div>
-        <div class="stat-num major">11</div>
+        <div class="stat-num major">—</div>
         <div class="stat-sub">visual &amp; functional</div>
       </div>
       <div class="stat-card minor">
         <div class="stat-label"><span class="mi" style="font-size:13px;vertical-align:-2px">info</span> Minor</div>
-        <div class="stat-num minor">5</div>
+        <div class="stat-num minor">—</div>
         <div class="stat-sub">content &amp; polish</div>
       </div>
       <div class="stat-card pass">
         <div class="stat-label"><span class="mi" style="font-size:13px;vertical-align:-2px">check_circle</span> Resolved</div>
-        <div class="stat-num pass">11</div>
+        <div class="stat-num pass">—</div>
         <div class="stat-sub">this week</div>
       </div>
     </div>
@@ -1152,7 +1131,7 @@
     <div class="panel">
       <div class="panel-header">
         <span class="panel-title">Issues</span>
-        <span class="panel-count">24 total</span>
+        <span class="panel-count"></span>
         <div class="filters">
           <button class="filter-btn active" data-sev="all" onclick="filterSev('all')">All</button>
           <button class="filter-btn" data-sev="ADA" onclick="filterSev('ADA')">ADA</button>
@@ -1370,6 +1349,10 @@ function newScan() {
   const tbody = document.getElementById('issue-tbody');
   if (tbody) tbody.textContent = '';
 
+  // Clear panel count
+  const panelCount = document.querySelector('.panel-count');
+  if (panelCount) panelCount.textContent = '';
+
   // Clear subtitle
   const subtitle = document.querySelector('.page-subtitle');
   if (subtitle) subtitle.textContent = 'Enter a URL and run a scan';
@@ -1410,7 +1393,7 @@ function renderStatCards() {
     if (el) el.textContent = ['critical','major','minor','pass'].map((k,i) => i === 3 ? resolved : counts[k])[idx];
   });
   const badge = document.querySelector('.nav-badge');
-  if (badge) badge.textContent = counts.critical;
+  if (badge) badge.textContent = counts.critical || '';
 }
 
 function renderIssues() {
@@ -1432,6 +1415,12 @@ function renderIssues() {
       <td><span class="status-${esc(issue.status)}"><span class="status-dot"></span><span class="status-text">${esc(issue.status)}</span></span></td>
     </tr>
   `).join('');
+  
+  // Update panel count
+  const panelCount = document.querySelector('.panel-count');
+  if (panelCount) {
+    panelCount.textContent = filtered.length + (filtered.length !== 1 ? ' issues' : ' issue');
+  }
 }
 
 function filterSev(sev) {
@@ -1575,7 +1564,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (latest) {
       await loadScan(latest.id);
     } else {
-      // No scans yet — clear the hardcoded placeholder values
+      // No scans yet — clear the dashboard values
       const numEl = document.querySelector('.score-label .num');
       if (numEl) numEl.textContent = '—';
       document.querySelectorAll('.stat-card .stat-num').forEach(el => el.textContent = '—');
