@@ -1,11 +1,1 @@
-```
-# Dependencies
-node_modules/
-
-# Database
-data/quality.db
-
-# Logs
-*.log
-
-```
+Nothing needs to be added to the .gitignore file based on the provided changes. The only modified file is 'dashboard/index.html', which is a source code file and should not be ignored.
